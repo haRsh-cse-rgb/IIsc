@@ -1,14 +1,20 @@
 import { io, Socket } from 'socket.io-client';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const getSocketUrl = () => {
+  if (typeof window === 'undefined') return '';
+  return process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL || '';
+};
 
 class SocketClient {
   private socket: Socket | null = null;
 
   connect() {
+    if (typeof window === 'undefined') return null as any;
     if (this.socket?.connected) return this.socket;
 
-    this.socket = io(API_URL, {
+    const url = getSocketUrl();
+    this.socket = io(url || window.location.origin, {
+      path: '/api/socket',
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,

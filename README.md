@@ -28,19 +28,14 @@ A Progressive Web App for the 4-day STIS Conference at IISc Bangalore, featuring
 
 ## Technology Stack
 
-### Backend
-- Node.js + Express
-- MongoDB for data persistence
-- Socket.IO for real-time updates
-- JWT authentication
-- Bcrypt for password hashing
-
-### Frontend
-- React 18 with TypeScript
-- Tailwind CSS for styling
-- Socket.IO client
-- date-fns for date formatting
-- Lucide React for icons
+### Full Stack
+- **Next.js 14** with App Router (React 18 + TypeScript)
+- **MongoDB** for data persistence
+- **Socket.IO** for real-time updates
+- **JWT authentication** with bcrypt password hashing
+- **Tailwind CSS** for styling
+- **date-fns** for date formatting
+- **Lucide React** for icons
 
 ## Environment Variables
 
@@ -51,11 +46,13 @@ Create a `.env` file in the root directory:
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
 
 # Server Configuration
-PORT=3001
+PORT=3000
 JWT_SECRET=your-secret-key-change-in-production
 
-# Frontend API URL
-VITE_API_URL=http://localhost:3001
+# Next.js Public Variables
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3000
 ```
 
 **IMPORTANT**: Never expose MongoDB credentials in client-side code. The connection string is used only on the server.
@@ -83,57 +80,73 @@ This will create:
 
 ### Development
 
-Run the backend server:
-```bash
-npm run server:dev
-```
-
-Run the frontend (in a separate terminal):
+Run the Next.js development server (includes both frontend and backend):
 ```bash
 npm run dev
 ```
 
 The app will be available at:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3001
+- Application: http://localhost:3000
+- API Routes: http://localhost:3000/api/*
+- Socket.IO: http://localhost:3000/api/socket
 
 ### Production
 
-Build the frontend:
+Build the application:
 ```bash
 npm run build
 ```
 
 Start the production server:
 ```bash
-npm run server
+npm start
 ```
 
 ## Project Structure
 
 ```
 project/
-├── server/
-│   ├── models/          # MongoDB schemas
-│   ├── routes/          # API endpoints
-│   ├── middleware/      # Auth, audit logging
-│   ├── config/          # Database connection
-│   ├── utils/           # JWT utilities
-│   ├── index.ts         # Server entry point
-│   └── seed.ts          # Database seeding
+├── app/                 # Next.js App Router
+│   ├── api/             # API routes (Next.js Route Handlers)
+│   │   ├── auth/        # Authentication endpoints
+│   │   ├── announcements/
+│   │   ├── schedules/
+│   │   ├── halls/
+│   │   ├── complaints/
+│   │   └── events/
+│   ├── (pages)/         # Page routes
+│   │   ├── page.tsx     # Home page
+│   │   ├── programs/
+│   │   ├── halls/
+│   │   ├── maps/
+│   │   ├── complaints/
+│   │   ├── events/
+│   │   ├── admin/
+│   │   └── login/
+│   └── layout.tsx        # Root layout
+│
+├── lib/
+│   └── server/          # Server-side utilities
+│       ├── models/      # MongoDB schemas
+│       ├── database.ts  # Database connection
+│       ├── auth.ts      # Authentication utilities
+│       ├── jwt.ts       # JWT utilities
+│       ├── audit.ts     # Audit logging
+│       └── seed.ts      # Database seeding
 │
 ├── src/
 │   ├── components/      # Reusable UI components
-│   ├── pages/           # Page components
 │   ├── contexts/        # React contexts (Auth)
-│   ├── lib/             # API client, socket client
-│   ├── types/           # TypeScript interfaces
-│   └── App.tsx          # Main app component
+│   ├── lib/             # Client-side utilities
+│   │   ├── api.ts       # API client
+│   │   └── socket.ts    # Socket.IO client
+│   └── types/           # TypeScript interfaces
 │
 ├── public/
 │   ├── manifest.json    # PWA manifest
 │   └── sw.js            # Service worker
 │
+├── server.js            # Custom Next.js server (Socket.IO)
 └── package.json
 ```
 

@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api } from '../lib/api';
 import { User } from '../types';
@@ -24,28 +26,38 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (storedToken) {
+        setToken(storedToken);
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      }
     }
-  }, [token]);
+  }, []);
 
   const login = async (email: string, password: string) => {
     const response = await api.login(email, password);
     setToken(response.token);
     setUser(response.user);
     api.setToken(response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(response.user));
+    }
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
     api.setToken(null);
-    localStorage.removeItem('user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user');
+    }
   };
 
   const isAdmin = user?.role === 'admin';

@@ -1,0 +1,103 @@
+import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
+import { Schedule } from '@/lib/server/models/Schedule';
+import { Hall, hallSchema } from '@/lib/server/models/Hall';
+import { connectDatabase } from '@/lib/server/database';
+import { requireRole, getAuthUser } from '@/lib/server/auth';
+import { createAuditLog } from '@/lib/server/audit';
+import { getSocketIO } from '@/lib/server/socket';
+
+export async function GET(request: NextRequest) {
+  try {
+    await connectDatabase();
+
+    // Ensure Hall model is registered on the connection
+    // This is necessary in Next.js due to module loading order issues
+    if (!mongoose.connection.models.Hall) {
+      // Re-register the Hall model on the connection if it doesn't exist
+      mongoose.connection.model('Hall', hallSchema);
+    }
+
+    const { searchParams } = new URL(request.url);
+    const hall = searchParams.get('hall');
+    const status = searchParams.get('status');
+    const day = searchParams.get('day');
+    const tags = searchParams.get('tags');
+
+    const query: any = {};
+    if (hall) query.hall = hall;
+    if (status) query.status = status;
+    if (tags) query.tags = { $in: tags.split(',') };
+
+    if (day) {
+      const startOfDay = new Date(day);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(day);
+      endOfDay.setHours(23, 59, 59, 999);
+      query.startTime = { $gte: startOfDay, $lte: endOfDay };
+    }
+
+    const schedules = await Schedule.find(query)
+      .populate('hall', 'name code location')
+      .sort({ startTime: 1 });
+
+    // Convert to plain objects using JSON serialization
+    const serialized = JSON.parse(JSON.stringify(schedules));
+
+    console.log(`Returning ${serialized.length} schedules`);
+    return NextResponse.json(serialized);
+  } catch (error) {
+    console.error('Get schedules error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch schedules' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    await connectDatabase();
+
+    // Ensure Hall model is registered on the connection
+    if (!mongoose.connection.models.Hall) {
+      mongoose.connection.model('Hall', hallSchema);
+    }
+
+    const user = requireRole(request, 'admin');
+    const body = await request.json();
+
+    if (!body.title || !body.authors || !body.hall || !body.startTime || !body.endTime) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    const schedule = await Schedule.create(body);
+    const populated = await schedule.populate('hall', 'name code location');
+    const plainSchedule = populated.toObject ? populated.toObject() : populated;
+
+    const io = getSocketIO();
+    if (io) {
+      io.emit('schedule:new', plainSchedule);
+    }
+
+    const response = NextResponse.json(plainSchedule, { status: 201 });
+    await createAuditLog(request, response, user, 'create', 'schedule', populated._id.toString(), body);
+    return response;
+  } catch (error: any) {
+    if (error.message === 'Unauthorized' || error.message === 'Forbidden') {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === 'Unauthorized' ? 401 : 403 }
+      );
+    }
+    console.error('Create schedule error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create schedule' },
+      { status: 500 }
+    );
+  }
+}
+

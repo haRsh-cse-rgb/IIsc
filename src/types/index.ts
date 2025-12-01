@@ -85,3 +85,19 @@ export interface Event {
   ticketInfo?: string;
   imageUrl?: string;
 }
+
+export interface MenuCategory {
+  name: string;
+  items: string[];
+}
+
+export interface Menu {
+  _id: string;
+  day: number; // 1, 2, or 3
+  mealType: 'breakfast' | 'lunch' | 'tea' | 'tea-am' | 'tea-pm';
+  items?: string[]; // Legacy support
+  categories?: MenuCategory[]; // New structure with categories
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}

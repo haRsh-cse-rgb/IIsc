@@ -1,20 +1,26 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = typeof window !== 'undefined' 
+  ? (process.env.NEXT_PUBLIC_API_URL || '') 
+  : '';
 
 export class ApiClient {
   private baseUrl: string;
   private token: string | null = null;
 
   constructor() {
-    this.baseUrl = `${API_URL}/api`;
-    this.token = localStorage.getItem('token');
+    this.baseUrl = API_URL ? `${API_URL}/api` : '/api';
+    if (typeof window !== 'undefined') {
+      this.token = localStorage.getItem('token');
+    }
   }
 
   setToken(token: string | null) {
     this.token = token;
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
+    if (typeof window !== 'undefined') {
+      if (token) {
+        localStorage.setItem('token', token);
+      } else {
+        localStorage.removeItem('token');
+      }
     }
   }
 
@@ -28,17 +34,23 @@ export class ApiClient {
       headers.Authorization = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    const url = `${this.baseUrl}${endpoint}`;
+    console.log(`API Request: ${options.method || 'GET'} ${url}`);
+
+    const response = await fetch(url, {
       ...options,
       headers,
     });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ error: 'Request failed' }));
+      console.error(`API Error (${response.status}):`, error);
       throw new Error(error.error || 'Request failed');
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(`API Response from ${url}:`, Array.isArray(data) ? `${data.length} items` : 'object');
+    return data;
   }
 
   async login(email: string, password: string) {
@@ -120,6 +132,19 @@ export class ApiClient {
     });
   }
 
+  async updateHall(id: string, data: any) {
+    return this.request<any>(`/halls/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteHall(id: string) {
+    return this.request<any>(`/halls/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   async getComplaints(params?: { status?: string; category?: string; priority?: string }) {
     const query = new URLSearchParams(params as any).toString();
     return this.request<any[]>(`/complaints${query ? `?${query}` : ''}`);
@@ -181,6 +206,31 @@ export class ApiClient {
 
   async deleteUser(id: string) {
     return this.request<any>(`/users/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getMenus(params?: { day?: number; mealType?: string }) {
+    const query = new URLSearchParams(params as any).toString();
+    return this.request<any[]>(`/menus${query ? `?${query}` : ''}`);
+  }
+
+  async createMenu(data: any) {
+    return this.request<any>('/menus', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateMenu(id: string, data: any) {
+    return this.request<any>(`/menus/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteMenu(id: string) {
+    return this.request<any>(`/menus/${id}`, {
       method: 'DELETE',
     });
   }

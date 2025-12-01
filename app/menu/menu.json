@@ -1,0 +1,630 @@
+[
+  {
+    "day": 1,
+    "mealType": "breakfast",
+    "description": "Breakfast Menu (7:45 AM - 9:15 AM)",
+    "categories": [
+      {
+        "name": "Fruit Juice & Shake",
+        "items": [
+          "CANNED MIXED FRUIT JUICE",
+          "STRAWBERRY MILKSHAKE"
+        ]
+      },
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "GINGER TEA",
+          "COFFEE"
+        ]
+      },
+      {
+        "name": "Fresh Cut Fruits",
+        "items": [
+          "PAPAYA",
+          "BANANA",
+          "WATERMELON"
+        ]
+      },
+      {
+        "name": "Breakfast Cereals",
+        "items": [
+          "CORN FLAKES",
+          "CHOCO FLAKES",
+          "HOT & COLD MILK"
+        ]
+      },
+      {
+        "name": "Yoghurt",
+        "items": [
+          "PLAIN YOGHURT",
+          "FLAVOURED YOGHURT (MANGO)"
+        ]
+      },
+      {
+        "name": "Breakfast Rolls",
+        "items": [
+          "COLESLAW SANDWICH",
+          "VANILLA CREAM MUFFIN",
+          "WALNUT BROWNIE SLICE",
+          "BUTTER/JAM/HONEY"
+        ]
+      },
+      {
+        "name": "HOT BUFFET",
+        "items": [
+          "STEAM IDLI",
+          "MEDU VADA",
+          "SAMBAR",
+          "CHUTNEY - 2 TYPES",
+          "PEANUT POHA",
+          "ALOO ONION PARATHA (With Pickle & Curd)",
+          "AJWAIN KI POORI",
+          "ALOO TAMATAR RASEDAAR"
+        ]
+      },
+      {
+        "name": "Desserts",
+        "items": [
+          "KESARI RAJBHOG"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 1,
+    "mealType": "lunch",
+    "description": "Lunch Menu (1:00 PM - 2:15 PM)",
+    "categories": [
+      {
+        "name": "Soup",
+        "items": [
+          "CLASSIC TOMATO SOUP"
+        ]
+      },
+      {
+        "name": "Salad",
+        "items": [
+          "GREEN SALAD",
+          "RUSSIAN SALAD",
+          "CHANA CHIPOTLE SALAD"
+        ]
+      },
+      {
+        "name": "Raita",
+        "items": [
+          "BOONDI RAITA",
+          "DAHI VADA"
+        ]
+      },
+      {
+        "name": "Non-Veg Mains",
+        "items": [
+          "FISH CUTLET",
+          "MURG MAKHANI"
+        ]
+      },
+      {
+        "name": "Indian Veg Mains",
+        "items": [
+          "PANEER PATIALA",
+          "TAWA SUBZ MILONI",
+          "CORN METHI MALAI"
+        ]
+      },
+      {
+        "name": "Continental Veg Mains",
+        "items": [
+          "CORN SPINACH CHEESE POPPERS",
+          "BASIL PESTO PASTA (IN PENNE)"
+        ]
+      },
+      {
+        "name": "Oriental Mains",
+        "items": [
+          "BUTTER GARLIC NOODLES",
+          "EXOTIC VEG IN HOT GARLIC"
+        ]
+      },
+      {
+        "name": "Lentil",
+        "items": [
+          "LAHSOONI DAL TADKA",
+          "PEPPER RASAM"
+        ]
+      },
+      {
+        "name": "Rice & Breads",
+        "items": [
+          "VEG SHAHI PULAO",
+          "PLAIN STEAM RICE",
+          "ASSORTED TANDOORI BREADS (Naan, Roti, Kulche)"
+        ]
+      },
+      {
+        "name": "Accompaniments",
+        "items": [
+          "PICKLE - 2 VARIETIES",
+          "MOONG PAPAD",
+          "CHAWAL PAPAD"
+        ]
+      },
+      {
+        "name": "Desserts",
+        "items": [
+          "SPL.GAJAR HALWA",
+          "BENGALI KESAR CREAM CHOP",
+          "VANILLA ICE-CREAM"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 1,
+    "mealType": "tea-am",
+    "description": "Hi-Tea (AM) - 11:00 AM",
+    "categories": [
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "TEA",
+          "COFFEE",
+          "GREEN TEA",
+          "LEMON TEA"
+        ]
+      },
+      {
+        "name": "Snack",
+        "items": [
+          "KHASTA KACHORI",
+          "COLESLAW SANDWICH",
+          "NAMAK PARA"
+        ]
+      },
+      {
+        "name": "Dessert",
+        "items": [
+          "VANILLA TEA CAKE"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 1,
+    "mealType": "tea-pm",
+    "description": "Hi-Tea (PM) - 3:30 PM",
+    "categories": [
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "TEA",
+          "COFFEE",
+          "GREEN TEA",
+          "LEMON TEA"
+        ]
+      },
+      {
+        "name": "Snack",
+        "items": [
+          "COOKIES"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "mealType": "breakfast",
+    "description": "Breakfast Menu (7:45 AM - 9:15 AM)",
+    "categories": [
+      {
+        "name": "Fruit Juice & Shake",
+        "items": [
+          "CANNED ORANGE JUICE",
+          "VANILLA COLD COFFEE"
+        ]
+      },
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "GINGER TEA",
+          "COFFEE"
+        ]
+      },
+      {
+        "name": "Fresh Cut Fruits",
+        "items": [
+          "GUAVA",
+          "BANANA",
+          "WATERMELON"
+        ]
+      },
+      {
+        "name": "Breakfast Cereals",
+        "items": [
+          "CORN FLAKES",
+          "CHOCO FLAKES",
+          "HOT & COLD MILK"
+        ]
+      },
+      {
+        "name": "Yoghurt",
+        "items": [
+          "PLAIN YOGHURT",
+          "FLAVOURED YOGHURT (STRAWBERRY)"
+        ]
+      },
+      {
+        "name": "Breakfast Rolls",
+        "items": [
+          "PANEER CHILLY SANDWICH",
+          "BLUEBERRY MUFFIN",
+          "DANISH PASTRY",
+          "BUTTER/JAM/HONEY"
+        ]
+      },
+      {
+        "name": "HOT BUFFET",
+        "items": [
+          "STEAM IDLI",
+          "MASALA VADA",
+          "SAMBAR",
+          "CHUTNEY - 2 TYPES",
+          "SHAVIGE BATH",
+          "GOBI PARATHA (With Pickle & Curd)",
+          "BAKERY KULCHE",
+          "PINDI CHOLE MASALA"
+        ]
+      },
+      {
+        "name": "Desserts",
+        "items": [
+          "BENGALI FANCY"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "mealType": "lunch",
+    "description": "Lunch Menu (1:00 PM - 2:15 PM)",
+    "categories": [
+      {
+        "name": "Soup",
+        "items": [
+          "LEMON CORRIANDER SOUP"
+        ]
+      },
+      {
+        "name": "Salad",
+        "items": [
+          "GREEN SALAD",
+          "MOONG MASALA SALAD",
+          "GREEK SALAD"
+        ]
+      },
+      {
+        "name": "Raita",
+        "items": [
+          "PINEAPPLE RAITA",
+          "DAHI PAPDI CHAAT"
+        ]
+      },
+      {
+        "name": "Non-Veg Mains",
+        "items": [
+          "MUTTON SEEKH KEBAB",
+          "KADHAI CHICKEN MASALA"
+        ]
+      },
+      {
+        "name": "Indian Veg Mains",
+        "items": [
+          "SHAAM SAVERA KOFTA",
+          "ADRAKI GOBI MUTTER DRY",
+          "LAHSOONI ALOO PALAK"
+        ]
+      },
+      {
+        "name": "Continental Veg Mains",
+        "items": [
+          "COLESLAW GALOUTI SLIDER",
+          "SPAGHETTI ARRABIATA"
+        ]
+      },
+      {
+        "name": "Oriental Mains",
+        "items": [
+          "TRIPLE SCHEZWAN RICE",
+          "VEG BALL MANCHURIAN"
+        ]
+      },
+      {
+        "name": "Lentil",
+        "items": [
+          "PUNJABI DAL MAKHANI",
+          "PEPPER RASAM"
+        ]
+      },
+      {
+        "name": "Rice & Breads",
+        "items": [
+          "VEG ZAFFRANI BIRYANI",
+          "PLAIN STEAM RICE",
+          "ASSORTED TANDOORI BREADS (Naan, Roti, Kulcha)"
+        ]
+      },
+      {
+        "name": "Accompaniments",
+        "items": [
+          "PICKLE - 2 VARIETIES",
+          "MOONG PAPAD",
+          "CHAWAL PAPAD"
+        ]
+      },
+      {
+        "name": "Desserts",
+        "items": [
+          "MANGO CREAM PARFAIT",
+          "HOT ANGOORI JAMUN",
+          "BUTTERSCOTCH ICE-CREAM"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "mealType": "tea-am",
+    "description": "Hi-Tea (AM) - 11:00 AM",
+    "categories": [
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "TEA",
+          "COFFEE",
+          "GREEN TEA",
+          "LEMON TEA"
+        ]
+      },
+      {
+        "name": "Snack",
+        "items": [
+          "COOKIES"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "mealType": "tea-pm",
+    "description": "Hi-Tea (PM) - 3:30 PM",
+    "categories": [
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "TEA",
+          "COFFEE",
+          "GREEN TEA",
+          "LEMON TEA"
+        ]
+      },
+      {
+        "name": "Snack",
+        "items": [
+          "COOKIES"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "mealType": "breakfast",
+    "description": "Breakfast Menu (7:45 AM - 9:15 AM)",
+    "categories": [
+      {
+        "name": "Fruit Juice & Shake",
+        "items": [
+          "CANNED PINEAPPLE JUICE",
+          "CHOCOLATE MILK SHAKE"
+        ]
+      },
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "GINGER TEA",
+          "COFFEE"
+        ]
+      },
+      {
+        "name": "Fresh Cut Fruits",
+        "items": [
+          "PINEAPPLE",
+          "BANANA",
+          "WATERMELON"
+        ]
+      },
+      {
+        "name": "Breakfast Cereals",
+        "items": [
+          "CORN FLAKES",
+          "CHOCO FLAKES",
+          "HOT & COLD MILK"
+        ]
+      },
+      {
+        "name": "Yoghurt",
+        "items": [
+          "PLAIN YOGHURT",
+          "FLAVOURED YOGHURT (KIWI)"
+        ]
+      },
+      {
+        "name": "Breakfast Rolls",
+        "items": [
+          "CORN SPINACH SANDWICH",
+          "RAWA CAKE",
+          "MINI DONUTS",
+          "BUTTER/JAM/HONEY"
+        ]
+      },
+      {
+        "name": "HOT BUFFET",
+        "items": [
+          "TATTE IDLI",
+          "MYSORE BONDA",
+          "SAMBAR",
+          "CHUTNEY - 2 TYPES",
+          "KHARA BATH",
+          "PANEER PYAZ PARATHA (With Pickle & Curd)",
+          "CLUB KACHORI",
+          "ALOO SABZI"
+        ]
+      },
+      {
+        "name": "Dessert",
+        "items": [
+          "WHITE KALAKAND"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "mealType": "lunch",
+    "description": "Lunch Menu (1:00 PM - 2:15 PM)",
+    "categories": [
+      {
+        "name": "Soup",
+        "items": [
+          "CREAM OF VEG SOUP"
+        ]
+      },
+      {
+        "name": "Salad",
+        "items": [
+          "GREEN SALAD",
+          "RAJMA SALSA SALAD",
+          "COLESLAW SALAD"
+        ]
+      },
+      {
+        "name": "Raita",
+        "items": [
+          "CUCUMBER KALAUNJI RAITA",
+          "CURD RICE"
+        ]
+      },
+      {
+        "name": "Non-Veg Mains",
+        "items": [
+          "HONEY GLAZED GARLIC CHICKEN",
+          "MURG MUSALLAM"
+        ]
+      },
+      {
+        "name": "Indian Veg Mains",
+        "items": [
+          "KHOVA BINANERI PANEER",
+          "RAJASTHANI GATTA MASALA",
+          "KOTA DUM ALOO PYAAZ"
+        ]
+      },
+      {
+        "name": "Continental Veg Mains",
+        "items": [
+          "ALFREDO PASTA (IN FUSELLI)",
+          "BAKED BEANS BUNNY CHOW"
+        ]
+      },
+      {
+        "name": "Oriental Mains",
+        "items": [
+          "SINGAPORE NOODLES",
+          "CRISPY FLORET IN HUNAN SAUCE"
+        ]
+      },
+      {
+        "name": "Lentil",
+        "items": [
+          "PUNJABI KADHI PAKODI",
+          "DAL GANGA JAMUNA"
+        ]
+      },
+      {
+        "name": "Rice & Breads",
+        "items": [
+          "GHEE JEERA RICE",
+          "PLAIN STEAM RICE",
+          "ASSORTED TANDOORI BREADS (Naan, Roti, Kulcha)"
+        ]
+      },
+      {
+        "name": "Accompaniments",
+        "items": [
+          "PICKLE - 2 VARIETIES",
+          "MOONG PAPAD",
+          "CHAWAL PAPAD"
+        ]
+      },
+      {
+        "name": "Desserts",
+        "items": [
+          "CHOCO CREAM FUDGE BITE",
+          "MOONG DAL HALWA",
+          "MATKA RABDI"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "mealType": "tea-am",
+    "description": "Hi-Tea (AM) - 11:00 AM",
+    "categories": [
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "TEA",
+          "COFFEE",
+          "GREEN TEA",
+          "LEMON TEA"
+        ]
+      },
+      {
+        "name": "Snack",
+        "items": [
+          "COOKIES"
+        ]
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "mealType": "tea-pm",
+    "description": "Hi-Tea (PM) - 3:30 PM",
+    "categories": [
+      {
+        "name": "Hot Beverages",
+        "items": [
+          "TEA",
+          "COFFEE",
+          "GREEN TEA",
+          "LEMON TEA"
+        ]
+      },
+      {
+        "name": "Snack",
+        "items": [
+          "KHASTA KACHORI",
+          "COLESLAW SANDWICH",
+          "NAMAK PARA"
+        ]
+      },
+      {
+        "name": "Dessert",
+        "items": [
+          "VANILLA TEA CAKE"
+        ]
+      }
+    ]
+  }
+]
