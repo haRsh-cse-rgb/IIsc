@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { Announcement } from '@/lib/server/models/Announcement';
+import { Announcement, IAnnouncement } from '@/lib/server/models/Announcement';
 import { User, userSchema } from '@/lib/server/models/User';
 import { connectDatabase } from '@/lib/server/database';
 import { requireRole, getAuthUser } from '@/lib/server/auth';
@@ -65,10 +65,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const announcement = await Announcement.create({
+    const announcementResult = await Announcement.create({
       ...body,
       createdBy: user.userId
     });
+    
+    // Handle both single document and array cases
+    const announcement = Array.isArray(announcementResult) 
+      ? announcementResult[0] 
+      : announcementResult;
 
     const populated = await announcement.populate('createdBy', 'name email');
     const plainAnnouncement = populated.toObject ? populated.toObject() : populated;

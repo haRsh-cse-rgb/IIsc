@@ -25,11 +25,16 @@ export const Layout = ({ children }: LayoutProps) => {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => console.log('SW registered:', registration))
-          .catch(error => console.log('SW registration failed:', error));
-      });
+      // Register service worker immediately, don't wait for load
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then(registration => {
+          console.log('SW registered:', registration);
+          // Check for updates
+          registration.update();
+        })
+        .catch(error => {
+          console.error('SW registration failed:', error);
+        });
     }
   }, []);
 
@@ -37,10 +42,6 @@ export const Layout = ({ children }: LayoutProps) => {
     // Check if app is already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isAndroid = /Android/.test(navigator.userAgent);
-    
-    // Only show install button on mobile/tablet devices
-    const isMobileDevice = isIOS || isAndroid || window.innerWidth < 1024;
     
     if (isStandalone) {
       setShowInstallButton(false);
@@ -50,19 +51,32 @@ export const Layout = ({ children }: LayoutProps) => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      if (isMobileDevice) {
-        setShowInstallButton(true);
-      }
+      // Show install button on all devices when prompt is available
+      setShowInstallButton(true);
+      console.log('Install prompt available');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // For iOS, show install button if not already installed
-    if (isIOS && isMobileDevice && !isStandalone) {
+    if (isIOS && !isStandalone) {
       setShowInstallButton(true);
     }
 
+    // On desktop browsers, sometimes the prompt is delayed
+    // Show button after a short delay to give time for the prompt
+    const timer = setTimeout(() => {
+      setShowInstallButton(prev => {
+        // Only show if not already installed and we haven't received a prompt yet
+        if (!isStandalone) {
+          return true; // Show button for manual installation instructions
+        }
+        return prev;
+      });
+    }, 3000);
+    
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
@@ -178,7 +192,7 @@ export const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
 
-      {/* Download as App Button - Only visible on mobile/tablet */}
+      {/* Download as App Button - Visible on all devices */}
       {showInstallButton && (
         <>
           {/* Mobile: Full width button at bottom */}
@@ -192,8 +206,8 @@ export const Layout = ({ children }: LayoutProps) => {
             </button>
           </div>
 
-          {/* Tablet: Fixed button in corner */}
-          <div className="hidden md:block lg:hidden fixed bottom-4 right-4 z-50">
+          {/* Desktop/Tablet: Fixed button in corner */}
+          <div className="hidden md:block fixed bottom-4 right-4 z-50">
             <button
               onClick={handleInstallClick}
               className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center space-x-2 font-medium hover:from-blue-700 hover:to-blue-800 transition-all active:scale-95"

@@ -1,11 +1,7 @@
 {
   "/page": "app/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/login/page": "app/login/page.js",
   "/programs/page": "app/programs/page.js",
-  "/api/announcements/route": "app/api/announcements/route.js",
   "/halls/page": "app/halls/page.js",
-  "/api/halls/status/route": "app/api/halls/status/route.js",
   "/maps/page": "app/maps/page.js",
   "/complaints/page": "app/complaints/page.js"
 }

@@ -193,10 +193,16 @@ function AnnouncementsTab() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Announcement | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    type: 'announcement' | 'alert' | 'transport' | 'dinner' | 'cultural';
+    priority: 'normal' | 'high' | 'urgent';
+    content: string;
+    link: string;
+  }>({
     title: '',
-    type: 'announcement' as const,
-    priority: 'normal' as const,
+    type: 'announcement',
+    priority: 'normal',
     content: '',
     link: '',
   });
@@ -413,13 +419,23 @@ function SchedulesTab() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Schedule | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    authors: string;
+    hall: string;
+    startTime: string;
+    endTime: string;
+    status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+    tags: string;
+    slideLink: string;
+    description: string;
+  }>({
     title: '',
     authors: '',
     hall: '',
     startTime: '',
     endTime: '',
-    status: 'upcoming' as const,
+    status: 'upcoming',
     tags: '',
     slideLink: '',
     description: '',
@@ -698,8 +714,11 @@ function ComplaintsTab() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Complaint | null>(null);
-  const [formData, setFormData] = useState({
-    status: 'pending' as const,
+  const [formData, setFormData] = useState<{
+    status: 'pending' | 'assigned' | 'in-progress' | 'resolved' | 'closed';
+    response: string;
+  }>({
+    status: 'pending',
     response: '',
   });
 
@@ -1032,9 +1051,19 @@ function EventsTab() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Event | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    type: 'dinner' | 'cultural';
+    description: string;
+    venue: string;
+    startTime: string;
+    endTime: string;
+    rsvpRequired: boolean;
+    ticketInfo: string;
+    imageUrl: string;
+  }>({
     title: '',
-    type: 'dinner' as const,
+    type: 'dinner',
     description: '',
     venue: '',
     startTime: '',
@@ -1290,10 +1319,14 @@ function UsersTab() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<UserType | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    role: 'admin' | 'volunteer' | 'attendee';
+  }>({
     name: '',
     email: '',
-    role: 'attendee' as const,
+    role: 'attendee',
   });
 
   useEffect(() => {

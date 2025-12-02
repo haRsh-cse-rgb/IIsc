@@ -54,7 +54,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const event = await Event.create(body);
+    const eventResult = await Event.create(body);
+    
+    // Handle both single document and array cases
+    const event = Array.isArray(eventResult) ? eventResult[0] : eventResult;
     const plainEvent = event.toObject ? event.toObject() : event;
     const serialized = {
       ...plainEvent,

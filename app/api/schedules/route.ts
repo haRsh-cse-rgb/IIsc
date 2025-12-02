@@ -74,7 +74,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const schedule = await Schedule.create(body);
+    const scheduleResult = await Schedule.create(body);
+    
+    // Handle both single document and array cases
+    const schedule = Array.isArray(scheduleResult) ? scheduleResult[0] : scheduleResult;
     const populated = await schedule.populate('hall', 'name code location');
     const plainSchedule = populated.toObject ? populated.toObject() : populated;
 

@@ -20,6 +20,7 @@ export default function MenuPage() {
       // Convert JSON data to Menu format (add _id for compatibility)
       const formattedMenus: Menu[] = menuData.map((menu, index) => ({
         ...menu,
+        mealType: menu.mealType as 'breakfast' | 'lunch' | 'tea' | 'tea-am' | 'tea-pm',
         _id: `menu-${menu.day}-${menu.mealType}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    serverActions: true,
-  },
   // PWA configuration
   async headers() {
     return [
@@ -13,6 +10,19 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=0, must-revalidate',
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/javascript',
+          },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/manifest+json',
           },
         ],
       },

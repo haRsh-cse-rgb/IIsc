@@ -84,7 +84,10 @@ export async function POST(request: NextRequest) {
       return response;
     } else {
       // Create new menu
-      const menu = await Menu.create(body);
+      const menuResult = await Menu.create(body);
+      
+      // Handle both single document and array cases
+      const menu = Array.isArray(menuResult) ? menuResult[0] : menuResult;
 
       const io = getSocketIO();
       if (io) {

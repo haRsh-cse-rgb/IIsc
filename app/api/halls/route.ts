@@ -96,7 +96,10 @@ export async function POST(request: NextRequest) {
     const user = requireRole(request, 'admin');
     const body = await request.json();
 
-    const hall = await Hall.create(body);
+    const hallResult = await Hall.create(body);
+    
+    // Handle both single document and array cases
+    const hall = Array.isArray(hallResult) ? hallResult[0] : hallResult;
 
     const response = NextResponse.json(hall, { status: 201 });
     await createAuditLog(request, response, user, 'create', 'hall', hall._id.toString(), body);
