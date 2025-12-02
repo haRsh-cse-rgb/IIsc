@@ -1,12 +1,14 @@
 {
-  "name": "STIS Conference",
-  "short_name": "STIS",
+  "name": "STIS-V",
+  "short_name": "STIS-V",
   "description": "4-day STIS Conference at IISc Bangalore - Real-time updates and schedules",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#2563eb",
-  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
   "orientation": "portrait-primary",
+  "categories": ["conference", "education", "productivity"],
   "icons": [
     {
       "src": "/icon-192.png",

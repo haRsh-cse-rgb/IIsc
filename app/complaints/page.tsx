@@ -36,7 +36,7 @@ export default function ComplaintsPage() {
       setTimeout(() => setSubmitted(false), 5000);
     } catch (error) {
       console.error('Failed to submit complaint:', error);
-      alert('Failed to submit feedback. Please try again.');
+      alert('Failed to submit. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export default function ComplaintsPage() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h2>
             <p className="text-gray-600 mb-6">
-              Your feedback has been submitted successfully. Our team will review it and take appropriate action.
+              Your complaint, query, or feedback has been submitted successfully. Our team will review it and take appropriate action.
             </p>
             <button
               onClick={() => setSubmitted(false)}
@@ -72,9 +72,9 @@ export default function ComplaintsPage() {
         <div className="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl shadow-lg p-8 text-white">
           <div className="flex items-center space-x-3 mb-3">
             <MessageCircle className="w-8 h-8" />
-            <h1 className="text-3xl font-bold">Feedback & Queries</h1>
+            <h1 className="text-3xl font-bold">Complaints, Queries & Feedback</h1>
           </div>
-          <p className="text-orange-100">Let us know how we can help improve your conference experience</p>
+          <p className="text-orange-100">Submit complaints, ask queries, or share feedback to help us improve your conference experience</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6 space-y-6">
@@ -89,6 +89,9 @@ export default function ComplaintsPage() {
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
+                <option value="complaint">Complaint</option>
+                <option value="query">Query</option>
+                <option value="feedback">Feedback</option>
                 <option value="transport">Transport</option>
                 <option value="guesthouse">Guest House</option>
                 <option value="cleaning">Cleaning</option>
@@ -137,7 +140,7 @@ export default function ComplaintsPage() {
               rows={5}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Please provide detailed information about your feedback or query"
+              placeholder="Please provide detailed information about your complaint, query, or feedback"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
             />
           </div>
@@ -183,7 +186,7 @@ export default function ComplaintsPage() {
             ) : (
               <>
                 <Send className="w-5 h-5" />
-                <span>Submit Feedback</span>
+                <span>Submit</span>
               </>
             )}
           </button>
@@ -192,7 +195,7 @@ export default function ComplaintsPage() {
         <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
           <h3 className="font-bold text-lg text-blue-900 mb-2">Privacy Note</h3>
           <p className="text-blue-800 text-sm">
-            Your feedback is important to us. Contact information is optional and will only be used if we need to
+            Your complaints, queries, and feedback are important to us. Contact information is optional and will only be used if we need to
             follow up with you regarding your submission.
           </p>
         </div>

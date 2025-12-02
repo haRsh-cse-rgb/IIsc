@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Configure output directory for Capacitor
+  distDir: '.next',
   // PWA configuration
   async headers() {
     return [
@@ -15,6 +17,10 @@ const nextConfig = {
             key: 'Content-Type',
             value: 'application/javascript',
           },
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/',
+          },
         ],
       },
       {
@@ -25,6 +31,15 @@ const nextConfig = {
             value: 'application/manifest+json',
           },
         ],
+      },
+    ];
+  },
+  // Ensure service worker is accessible
+  async rewrites() {
+    return [
+      {
+        source: '/sw.js',
+        destination: '/sw.js',
       },
     ];
   },

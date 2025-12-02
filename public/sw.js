@@ -1,7 +1,6 @@
 const CACHE_NAME = 'stis-conference-v1';
 const ASSETS_TO_CACHE = [
   '/',
-  '/index.html',
   '/manifest.json'
 ];
 
@@ -84,8 +83,9 @@ self.addEventListener('fetch', (event) => {
           });
         })
         .catch(() => {
+          // For Next.js, fallback to network for document requests
           if (request.destination === 'document') {
-            return caches.match('/index.html');
+            return fetch(request);
           }
         })
     );

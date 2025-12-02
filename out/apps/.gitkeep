@@ -1,0 +1,5 @@
+# This directory stores the built APK/IPA files
+# After building with Capacitor, place the files here:
+# - app-release.apk (Android)
+# - STIS-Conference.ipa (iOS)
+

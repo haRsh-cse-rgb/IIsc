@@ -25,18 +25,56 @@ export const Layout = ({ children }: LayoutProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      // Register service worker immediately, don't wait for load
-      navigator.serviceWorker.register('/sw.js', { scope: '/' })
-        .then(registration => {
-          console.log('SW registered:', registration);
-          // Check for updates
-          registration.update();
-        })
-        .catch(error => {
-          console.error('SW registration failed:', error);
-        });
+    // Only register service worker in production or when explicitly needed
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+      return;
     }
+
+    // Check if service worker file exists before registering
+    const registerServiceWorker = async () => {
+      try {
+        // First, try to unregister any existing problematic service workers
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            // Check if the registration is valid
+            try {
+              await registration.update();
+            } catch (updateError) {
+              // If update fails, unregister the problematic service worker
+              console.warn('Unregistering problematic service worker:', registration.scope);
+              await registration.unregister();
+            }
+          }
+        } catch (unregisterError) {
+          // Ignore errors during cleanup
+        }
+
+        // Check if the service worker file is accessible
+        try {
+          const response = await fetch('/sw.js', { method: 'HEAD' });
+          if (!response.ok) {
+            console.warn('⚠️ Service worker file not found, skipping registration');
+            return;
+          }
+        } catch (fetchError) {
+          console.warn('⚠️ Could not check service worker file, skipping registration');
+          return;
+        }
+
+        // Register the service worker
+        const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        console.log('✅ Service Worker registered:', registration);
+      } catch (error) {
+        // Silently handle all errors - service worker is optional for PWA install
+        // Don't show errors to user as this is not critical
+        console.warn('⚠️ Service Worker registration skipped (non-critical):', error);
+      }
+    };
+
+    // Delay registration slightly to ensure page is loaded
+    const timer = setTimeout(registerServiceWorker, 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -49,31 +87,23 @@ export const Layout = ({ children }: LayoutProps) => {
       return;
     }
 
+    // For automatic browser install prompt, we DON'T prevent default
+    // This allows Chrome/Edge to show their native install button automatically
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
+      // Store the event but DON'T prevent default - let browser show native prompt
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Show install button on all devices when prompt is available
+      console.log('Install prompt available - browser will show native prompt');
+      
+      // Show our custom button
       setShowInstallButton(true);
-      console.log('Install prompt available');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // For iOS, show install button immediately (no beforeinstallprompt on iOS)
-    if (isIOS && !isStandalone) {
-      setShowInstallButton(true);
-    } else {
-      // For Android/Desktop: Show button after a short delay
-      // This gives time for beforeinstallprompt to fire, but shows button even if it doesn't
-      const timer = setTimeout(() => {
-        setShowInstallButton(true);
-      }, 1000);
-      
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      };
-    }
+    // Always show install button (will work when prompt is available)
+    // For iOS, always show (no automatic prompt on iOS)
+    // For other platforms, show button - it will work when prompt becomes available
+    setShowInstallButton(true);
     
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -81,28 +111,38 @@ export const Layout = ({ children }: LayoutProps) => {
   }, []);
 
   const handleInstallClick = async () => {
+    // Use PWA install prompt (web app install)
     if (deferredPrompt) {
-      // Android/Desktop: Show native install prompt (one-click install!)
+      // Show the native browser install prompt
       try {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         
         if (outcome === 'accepted') {
           console.log('App installed successfully!');
+          setShowInstallButton(false);
+        } else {
+          console.log('User dismissed the install prompt');
         }
         
         setDeferredPrompt(null);
-        setShowInstallButton(false);
       } catch (error) {
         console.error('Install prompt error:', error);
+        // Fallback: Show instructions modal
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+          setShowIOSModal(true);
+        } else {
+          setShowIOSModal(true); // Show modal instead of alert
+        }
       }
     } else {
-      // iOS Safari: Show visual instructions modal
+      // No prompt available - show helpful modal instead of alert
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       if (isIOS) {
         setShowIOSModal(true);
       } else {
-        // Fallback for other browsers
+        // Show modal with helpful instructions
         setShowIOSModal(true);
       }
     }
@@ -113,7 +153,7 @@ export const Layout = ({ children }: LayoutProps) => {
     { id: '/programs', label: 'Programs', icon: Calendar, path: '/programs' },
     { id: '/halls', label: 'Halls', icon: Users, path: '/halls' },
     { id: '/maps', label: 'Maps', icon: MapPin, path: '/maps' },
-    { id: '/complaints', label: 'Feedback', icon: MessageCircle, path: '/complaints' },
+    { id: '/complaints', label: 'Complaints, Queries & Feedback', icon: MessageCircle, path: '/complaints' },
     { id: '/events', label: 'Events', icon: Utensils, path: '/events' },
     { id: '/menu', label: 'Menu', icon: Coffee, path: '/menu' },
   ];
@@ -196,7 +236,7 @@ export const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
 
-      {/* Download as App Button - Visible on all devices */}
+      {/* Install Web App Button - PWA Install */}
       {showInstallButton && (
         <>
           {/* Mobile: Full width button at bottom */}
@@ -206,7 +246,7 @@ export const Layout = ({ children }: LayoutProps) => {
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center justify-center space-x-2 font-medium hover:from-blue-700 hover:to-blue-800 transition-all active:scale-95"
             >
               <Download className="w-5 h-5" />
-              <span>Download as App</span>
+              <span>Install App</span>
             </button>
           </div>
 
@@ -246,37 +286,90 @@ export const Layout = ({ children }: LayoutProps) => {
               </button>
             </div>
             
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
-                  1
+            {/iPad|iPhone|iPod/.test(navigator.userAgent) ? (
+              // iOS Instructions
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                    1
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium">Tap the Share button</p>
+                    <p className="text-gray-600 text-sm">Look for the share icon at the bottom of your screen</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-800 font-medium">Tap the Share button</p>
-                  <p className="text-gray-600 text-sm">Look for the share icon at the bottom of your screen</p>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                    2
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium">Select "Add to Home Screen"</p>
+                    <p className="text-gray-600 text-sm">Scroll down in the share menu to find this option</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                    3
+                  </div>
+                  <div>
+                    <p className="text-gray-800 font-medium">Tap "Add"</p>
+                    <p className="text-gray-600 text-sm">The app will appear on your home screen!</p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
-                  2
+            ) : (
+              // Android/Desktop Instructions
+              <div className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-blue-800 font-medium mb-2">📱 Look for the Install Icon</p>
+                  <p className="text-blue-700 text-sm">
+                    Check your browser's address bar for an install icon (➕ or download icon). 
+                    Click it to install the app.
+                  </p>
                 </div>
-                <div>
-                  <p className="text-gray-800 font-medium">Select "Add to Home Screen"</p>
-                  <p className="text-gray-600 text-sm">Scroll down in the share menu to find this option</p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                      1
+                    </div>
+                    <div>
+                      <p className="text-gray-800 font-medium">Look in the address bar</p>
+                      <p className="text-gray-600 text-sm">Find the install icon (➕) next to the URL</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                      2
+                    </div>
+                    <div>
+                      <p className="text-gray-800 font-medium">Interact with the page</p>
+                      <p className="text-gray-600 text-sm">Scroll, click, or navigate - the install option may appear after engagement</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                      3
+                    </div>
+                    <div>
+                      <p className="text-gray-800 font-medium">Click Install</p>
+                      <p className="text-gray-600 text-sm">The app will be added to your home screen or desktop</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-gray-600 text-xs">
+                    <strong>Note:</strong> The install prompt appears automatically when PWA requirements are met. 
+                    If it doesn't appear, try refreshing the page or checking browser settings.
+                  </p>
                 </div>
               </div>
-              
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
-                  3
-                </div>
-                <div>
-                  <p className="text-gray-800 font-medium">Tap "Add"</p>
-                  <p className="text-gray-600 text-sm">The app will appear on your home screen!</p>
-                </div>
-              </div>
-            </div>
+            )}
             
             <div className="mt-6 pt-4 border-t border-gray-200">
               <button
