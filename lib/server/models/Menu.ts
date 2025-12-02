@@ -39,3 +39,5 @@ menuSchema.index({ day: 1, mealType: 1 }, { unique: true });
 
 export const Menu = mongoose.models.Menu || mongoose.model<IMenu>('Menu', menuSchema);
 
+
+

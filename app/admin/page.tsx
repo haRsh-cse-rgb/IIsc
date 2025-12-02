@@ -1051,9 +1051,11 @@ function EventsTab() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Event | null>(null);
+  const [customType, setCustomType] = useState('');
+  const [customTypes, setCustomTypes] = useState<string[]>([]);
   const [formData, setFormData] = useState<{
     title: string;
-    type: 'dinner' | 'cultural';
+    type: string;
     description: string;
     venue: string;
     startTime: string;
@@ -1073,6 +1075,27 @@ function EventsTab() {
     imageUrl: '',
   });
 
+  // Load custom types from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('eventCustomTypes');
+      if (stored) {
+        try {
+          setCustomTypes(JSON.parse(stored));
+        } catch (e) {
+          console.error('Failed to parse custom types:', e);
+        }
+      }
+    }
+  }, []);
+
+  // Get all available types (default + custom)
+  const getAllTypes = () => {
+    const defaultTypes = ['dinner', 'cultural'];
+    const allTypes = [...defaultTypes, ...customTypes];
+    return Array.from(new Set(allTypes)); // Remove duplicates
+  };
+
   useEffect(() => {
     loadEvents();
   }, []);
@@ -1091,28 +1114,60 @@ function EventsTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // If type is "other", use the custom type value
+      const finalType = formData.type === 'other' ? customType : formData.type;
+      
+      // Validate that if type is "other", customType must be provided
+      if (formData.type === 'other' && !customType.trim()) {
+        alert('Please enter a custom event type');
+        return;
+      }
+
+      // Validate that finalType is not empty
+      if (!finalType || !finalType.trim()) {
+        alert('Event type is required');
+        return;
+      }
+      
+      // Save custom type if it's new
+      if (formData.type === 'other' && customType && !customTypes.includes(customType.trim())) {
+        const newCustomTypes = [...customTypes, customType.trim()];
+        setCustomTypes(newCustomTypes);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('eventCustomTypes', JSON.stringify(newCustomTypes));
+        }
+      }
+
+      const submitData = {
+        ...formData,
+        type: finalType.trim(),
+      };
+
       if (editing) {
-        await api.updateEvent(editing._id, formData);
+        await api.updateEvent(editing._id, submitData);
       } else {
-        await api.createEvent(formData);
+        await api.createEvent(submitData);
       }
       setShowForm(false);
       setEditing(null);
+      setCustomType('');
       setFormData({
         title: '', type: 'dinner', description: '', venue: '', startTime: '', endTime: '',
         rsvpRequired: false, ticketInfo: '', imageUrl: '',
       });
       loadEvents();
-    } catch (error) {
-      alert('Failed to save event');
+    } catch (error: any) {
+      console.error('Error saving event:', error);
+      alert(`Failed to save event: ${error.message || 'Unknown error'}`);
     }
   };
 
   const handleEdit = (event: Event) => {
     setEditing(event);
+    const isCustomType = !['dinner', 'cultural'].includes(event.type);
     setFormData({
       title: event.title,
-      type: event.type,
+      type: isCustomType ? 'other' : event.type,
       description: event.description,
       venue: event.venue,
       startTime: format(new Date(event.startTime), "yyyy-MM-dd'T'HH:mm"),
@@ -1121,6 +1176,7 @@ function EventsTab() {
       ticketInfo: event.ticketInfo || '',
       imageUrl: event.imageUrl || '',
     });
+    setCustomType(isCustomType ? event.type : '');
     setShowForm(true);
   };
 
@@ -1145,6 +1201,7 @@ function EventsTab() {
           onClick={() => {
             setShowForm(true);
             setEditing(null);
+            setCustomType('');
             setFormData({
               title: '', type: 'dinner', description: '', venue: '', startTime: '', endTime: '',
               rsvpRequired: false, ticketInfo: '', imageUrl: '',
@@ -1165,7 +1222,7 @@ function EventsTab() {
               <X className="w-5 h-5" />
             </button>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Title</label>
@@ -1181,12 +1238,38 @@ function EventsTab() {
                 <label className="block text-sm font-medium mb-1">Type</label>
                 <select
                   value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, type: e.target.value });
+                    if (e.target.value !== 'other') {
+                      setCustomType('');
+                    }
+                  }}
                   className="w-full px-3 py-2 border rounded-lg"
                 >
                   <option value="dinner">Dinner</option>
                   <option value="cultural">Cultural</option>
+                  <option value="other">Other</option>
+                  {customTypes.map((customType) => (
+                    <option key={customType} value={customType}>
+                      {customType}
+                    </option>
+                  ))}
                 </select>
+                {formData.type === 'other' && (
+                  <input
+                    type="text"
+                    required
+                    value={customType}
+                    onChange={(e) => setCustomType(e.target.value)}
+                    placeholder="Enter custom event type"
+                    className="w-full px-3 py-2 border rounded-lg mt-2"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
+                )}
               </div>
             </div>
             <div>

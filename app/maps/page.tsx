@@ -21,16 +21,16 @@ export default function MapsPage() {
       color: 'blue'
     },
     {
-      name: 'Registration Desk',
-      address: 'Faculty Hall, IISc Campus',
-      coordinates: '13.0207,77.5662',
-      icon: HomeIcon,
+      name: 'J.N Tata Auditorium',
+      address: 'J.N Tata Auditorium, IISc Campus',
+      coordinates: '13.013462252940371, 77.56807693172787',
+      icon: Building,
       color: 'green'
     },
     {
-      name: 'Conference Halls',
-      address: 'Faculty Hall Complex, IISc',
-      coordinates: '13.0207,77.5662',
+      name: 'Satish Dhawan Auditorium',
+      address: 'Satish Dhawan Auditorium, IISc',
+      coordinates: '13.013859198158057, 77.56938281772588',
       icon: Building,
       color: 'purple'
     },

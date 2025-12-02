@@ -14,6 +14,7 @@ export default function ProgramsPage() {
   const [selectedHall, setSelectedHall] = useState<string>('all');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     loadSchedules();
@@ -42,6 +43,86 @@ export default function ProgramsPage() {
       socketClient.off('schedule:delete');
     };
   }, []);
+
+  // Update current time frequently and at exact transition moments
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    // Update every 5 seconds for responsive real-time updates
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 5000); // Update every 5 seconds
+
+    // Calculate next status transition time and set timeout
+    const calculateNextTransition = () => {
+      const now = new Date().getTime();
+      let nextTransition: number | null = null;
+
+      schedules.forEach(schedule => {
+        if (schedule.status === 'cancelled') return;
+
+        const startTime = new Date(schedule.startTime).getTime();
+        const endTime = new Date(schedule.endTime).getTime();
+
+        // If upcoming, next transition is when it starts
+        if (now < startTime) {
+          if (nextTransition === null || startTime < nextTransition) {
+            nextTransition = startTime;
+          }
+        }
+        // If ongoing, next transition is when it ends
+        else if (now >= startTime && now <= endTime) {
+          if (nextTransition === null || endTime < nextTransition) {
+            nextTransition = endTime;
+          }
+        }
+      });
+
+      return nextTransition;
+    };
+
+    const scheduleNextUpdate = () => {
+      // Clear any existing timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+
+      const nextTransition = calculateNextTransition();
+      if (nextTransition) {
+        const now = new Date().getTime();
+        const delay = Math.max(0, nextTransition - now);
+        
+        // Only set timeout if it's within a reasonable range (not too far in the future)
+        if (delay > 0 && delay < 24 * 60 * 60 * 1000) { // Within 24 hours
+          timeoutId = setTimeout(() => {
+            setCurrentTime(new Date());
+            scheduleNextUpdate(); // Schedule the next one
+          }, delay);
+        }
+      }
+    };
+
+    // Schedule updates for exact transition moments
+    scheduleNextUpdate();
+
+    // Also update when the page becomes visible again
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        setCurrentTime(new Date());
+        scheduleNextUpdate();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [schedules]);
 
   const loadSchedules = async () => {
     try {
@@ -104,6 +185,26 @@ export default function ProgramsPage() {
       (schedule.hall && typeof schedule.hall === 'object' && schedule.hall._id === selectedHall);
     return dayMatch && hallMatch;
   });
+
+  // Calculate status based on current time vs presentation time
+  const getCalculatedStatus = (schedule: Schedule): 'upcoming' | 'ongoing' | 'completed' | 'cancelled' => {
+    // If status is cancelled, respect that
+    if (schedule.status === 'cancelled') {
+      return 'cancelled';
+    }
+
+    const now = currentTime.getTime();
+    const startTime = new Date(schedule.startTime).getTime();
+    const endTime = new Date(schedule.endTime).getTime();
+
+    if (now < startTime) {
+      return 'upcoming';
+    } else if (now >= startTime && now <= endTime) {
+      return 'ongoing';
+    } else {
+      return 'completed';
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -246,10 +347,10 @@ export default function ProgramsPage() {
                   <div className="flex flex-col items-end space-y-2">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold uppercase border ${getStatusColor(
-                        schedule.status
+                        getCalculatedStatus(schedule)
                       )}`}
                     >
-                      {schedule.status}
+                      {getCalculatedStatus(schedule)}
                     </span>
 
                     {schedule.slideLink && (

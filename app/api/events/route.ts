@@ -47,9 +47,25 @@ export async function POST(request: NextRequest) {
     const user = requireRole(request, 'admin');
     const body = await request.json();
 
+    // Validate required fields
     if (!body.title || !body.type || !body.description || !body.venue || !body.startTime || !body.endTime) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields', details: { 
+          title: !body.title, 
+          type: !body.type, 
+          description: !body.description, 
+          venue: !body.venue, 
+          startTime: !body.startTime, 
+          endTime: !body.endTime 
+        }},
+        { status: 400 }
+      );
+    }
+
+    // Validate that type is not empty or "other"
+    if (body.type === 'other' || !body.type.trim()) {
+      return NextResponse.json(
+        { error: 'Invalid event type. Please select a valid type or enter a custom type.' },
         { status: 400 }
       );
     }
@@ -80,8 +96,13 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error('Create event error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
     return NextResponse.json(
-      { error: 'Failed to create event' },
+      { error: error.message || 'Failed to create event', details: error.message },
       { status: 500 }
     );
   }

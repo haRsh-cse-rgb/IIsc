@@ -10,7 +10,7 @@ import { Layout } from '@/src/components/Layout';
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [filter, setFilter] = useState<'all' | 'dinner' | 'cultural'>('all');
+  const [filter, setFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,14 +55,46 @@ export default function EventsPage() {
     filter === 'all' || event.type === filter
   );
 
+  // Get all unique event types from the events
+  const uniqueTypes = Array.from(new Set(events.map(event => event.type))).sort();
+
   const getEventIcon = (type: string) => {
-    return type === 'dinner' ? Utensils : Music;
+    if (type === 'dinner') return Utensils;
+    if (type === 'cultural') return Music;
+    // Default icon for custom types
+    return Calendar;
   };
 
   const getEventColor = (type: string) => {
-    return type === 'dinner'
-      ? 'from-orange-600 to-orange-700'
-      : 'from-purple-600 to-purple-700';
+    if (type === 'dinner') {
+      return 'from-orange-600 to-orange-700';
+    } else if (type === 'cultural') {
+      return 'from-purple-600 to-purple-700';
+    } else {
+      // Default color for custom types
+      return 'from-blue-600 to-blue-700';
+    }
+  };
+
+  const getFilterButtonColor = (type: string, isActive: boolean) => {
+    if (!isActive) {
+      return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+    }
+    if (type === 'dinner') {
+      return 'bg-orange-600 text-white';
+    } else if (type === 'cultural') {
+      return 'bg-purple-600 text-white';
+    } else {
+      return 'bg-blue-600 text-white';
+    }
+  };
+
+  const getTypeDisplayName = (type: string) => {
+    // Capitalize first letter and handle common types
+    if (type === 'dinner') return 'Dinners';
+    if (type === 'cultural') return 'Cultural';
+    // For custom types, capitalize first letter
+    return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   if (loading) {
@@ -87,10 +119,10 @@ export default function EventsPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 overflow-x-auto pb-2">
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 filter === 'all'
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -98,28 +130,19 @@ export default function EventsPage() {
             >
               All Events
             </button>
-            <button
-              onClick={() => setFilter('dinner')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'dinner'
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Utensils className="w-4 h-4" />
-              <span>Dinners</span>
-            </button>
-            <button
-              onClick={() => setFilter('cultural')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                filter === 'cultural'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Music className="w-4 h-4" />
-              <span>Cultural</span>
-            </button>
+            {uniqueTypes.map((type) => {
+              const Icon = getEventIcon(type);
+              return (
+                <button
+                  key={type}
+                  onClick={() => setFilter(type)}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${getFilterButtonColor(type, filter === type)}`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{getTypeDisplayName(type)}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -139,15 +162,17 @@ export default function EventsPage() {
                 >
                   <div className={`bg-gradient-to-r ${getEventColor(event.type)} p-6 text-white`}>
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-3">
-                        <div className="p-2 bg-white bg-opacity-20 rounded-lg">
+                      <div className="flex items-start space-x-3 flex-1 min-w-0">
+                        <div className="p-2 bg-white bg-opacity-20 rounded-lg flex-shrink-0">
                           <Icon className="w-6 h-6" />
                         </div>
-                        <div>
-                          <h3 className="text-2xl font-bold mb-1">{event.title}</h3>
-                          <span className="px-2 py-1 bg-white bg-opacity-20 rounded text-xs font-medium uppercase">
-                            {event.type}
-                          </span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-2xl font-bold mb-1 break-words">{event.title}</h3>
+                          <div className="overflow-x-auto">
+                            <span className="px-2 py-1 bg-white bg-opacity-20 rounded text-xs font-medium uppercase whitespace-nowrap inline-block">
+                              {event.type}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>

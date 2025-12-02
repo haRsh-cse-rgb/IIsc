@@ -76,7 +76,7 @@ export interface Complaint {
 export interface Event {
   _id: string;
   title: string;
-  type: 'dinner' | 'cultural';
+  type: string; // Allow any string type
   description: string;
   venue: string;
   startTime: string;

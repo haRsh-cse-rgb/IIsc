@@ -15,7 +15,16 @@ export function InstallPWA() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [showDebug, setShowDebug] = useState(false);
   const platform = usePlatform();
+
+  // Add debug message helper
+  const addDebugMessage = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugInfo(prev => [...prev.slice(-4), `[${timestamp}] ${message}`]);
+    console.log(`[PWA Install] ${message}`);
+  };
 
   useEffect(() => {
     // Check if app is already installed
@@ -24,10 +33,14 @@ export function InstallPWA() {
     // Check if iOS
     const checkIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     setIsIOS(checkIOS);
+    addDebugMessage(`Platform: ${platform}, iOS: ${checkIOS}`);
 
     const checkInstalled = () => {
       const standalone = window.matchMedia('(display-mode: standalone)').matches;
       setIsInstalled(standalone);
+      if (standalone) {
+        addDebugMessage('App already installed');
+      }
     };
 
     checkInstalled();
@@ -57,7 +70,7 @@ export function InstallPWA() {
       const promptEvent = e as BeforeInstallPromptEvent;
       setDeferredPrompt(promptEvent);
       setShowBanner(true);
-      console.log('✅ Install prompt available, banner shown');
+      addDebugMessage('✅ Install prompt available!');
       // Clear fallback timer since we got the prompt
       if (fallbackTimer) {
         clearTimeout(fallbackTimer);
@@ -78,15 +91,15 @@ export function InstallPWA() {
               const response = await fetch('/sw.js', { method: 'HEAD' });
               if (response.ok) {
                 registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-                console.log('✅ Service Worker registered for PWA install');
+                addDebugMessage('✅ Service Worker registered');
               } else {
-                console.warn('⚠️ Service worker file not found');
+                addDebugMessage('⚠️ Service worker file not found');
               }
             } catch (error) {
-              console.warn('⚠️ Could not register service worker:', error);
+              addDebugMessage('⚠️ Could not register service worker');
             }
           } else {
-            console.log('✅ Service Worker is already registered');
+            addDebugMessage('✅ Service Worker already registered');
           }
         } catch (error) {
           console.warn('Service worker check failed:', error);
@@ -102,15 +115,39 @@ export function InstallPWA() {
       setShowBanner((prev) => {
         // Only show if we still don't have a prompt and not installed
         if (!prev && !checkIOS && !isInstalled) {
-          console.log('⚠️ Install prompt not available yet, showing banner anyway');
+          addDebugMessage('⚠️ Install prompt delayed - may need user interaction');
+          // Check if browser supports PWA install
+          const supportsPWA = 'serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window;
+          if (!supportsPWA) {
+            addDebugMessage('⚠️ Browser may not support PWA install');
+          }
           return true;
         }
         return prev;
       });
     }, 3000); // Wait 3 seconds for the prompt event
-
+    
+    // Also try to trigger prompt after user interaction
+    // Some browsers only fire the event after user interaction
+    const handleUserInteraction = () => {
+      if (!deferredPrompt && !isInstalled && !checkIOS) {
+        // Check again after interaction
+        setTimeout(() => {
+          if (!deferredPrompt) {
+            addDebugMessage('💡 Try scrolling or clicking - prompt may appear after interaction');
+          }
+        }, 1000);
+      }
+    };
+    
+    // Listen for user interactions
+    window.addEventListener('scroll', handleUserInteraction, { once: true });
+    window.addEventListener('click', handleUserInteraction, { once: true });
+    
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('scroll', handleUserInteraction);
+      window.removeEventListener('click', handleUserInteraction);
       if (fallbackTimer) {
         clearTimeout(fallbackTimer);
       }
@@ -118,44 +155,51 @@ export function InstallPWA() {
   }, [platform, isInstalled]);
 
   const handleInstall = async () => {
+    addDebugMessage('Install button clicked');
+    
     // If iOS, show instructions
     if (isIOS) {
+      addDebugMessage('iOS detected - showing instructions');
       setShowInstructions(true);
       return;
     }
 
-    // If no deferred prompt, try to trigger it or show instructions
+    // If no deferred prompt, check if we can still install
     if (!deferredPrompt) {
-      console.warn('No install prompt available');
-      // Check if we can manually trigger install
-      // Some browsers show install button in address bar
+      addDebugMessage('⚠️ No install prompt available yet');
+      // Check if browser has install capability
+      const canInstall = window.matchMedia('(display-mode: standalone)').matches === false;
+      if (canInstall) {
+        addDebugMessage('💡 Try: Look for install icon (➕) in browser address bar');
+        addDebugMessage('💡 Or: Interact with page more (scroll, click) then try again');
+      }
       setShowInstructions(true);
       return;
     }
 
     try {
-      console.log('Triggering install prompt...');
+      addDebugMessage('Triggering install prompt...');
       // Show the install prompt
       await deferredPrompt.prompt();
       
       // Wait for user choice
       const { outcome } = await deferredPrompt.userChoice;
       
-      console.log('User choice:', outcome);
+      addDebugMessage(`User choice: ${outcome}`);
       
       if (outcome === 'accepted') {
-        console.log('✅ User accepted the install prompt');
+        addDebugMessage('✅ Installation accepted!');
         setShowBanner(false);
         // Clear dismissal so they can see it again if needed
         sessionStorage.removeItem('pwa-install-dismissed');
       } else {
-        console.log('User dismissed the install prompt');
+        addDebugMessage('User dismissed install');
       }
       
       // Clear the deferred prompt
       setDeferredPrompt(null);
     } catch (error) {
-      console.error('❌ Error showing install prompt:', error);
+      addDebugMessage(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       // If prompt fails, show instructions
       setShowInstructions(true);
     }
@@ -311,17 +355,30 @@ export function InstallPWA() {
             <p className="text-sm text-gray-600 mb-3">
               Get the full app experience with offline access
             </p>
+            {!deferredPrompt && !isIOS && (
+              <p className="text-xs text-amber-600 mb-2 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                Install prompt loading... Try scrolling or clicking first
+              </p>
+            )}
 
             {/* Buttons */}
             <div className="flex items-center gap-2">
               <button
                 onClick={handleInstall}
-                disabled={!deferredPrompt && !isIOS}
-                className={`flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm ${
-                  !deferredPrompt && !isIOS ? 'opacity-75 cursor-not-allowed' : ''
-                }`}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={false} // Always allow click - will show instructions if prompt not ready
+                title={!deferredPrompt && !isIOS ? 'Click to see installation options' : 'Install app'}
               >
-                {isIOS ? 'Show Instructions' : 'Install'}
+                {isIOS ? 'Show Instructions' : deferredPrompt ? 'Install Now' : 'Install'}
+              </button>
+              <button
+                onClick={() => setShowDebug(!showDebug)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-100"
+                aria-label="Toggle Debug"
+                title="Debug Info"
+              >
+                <AlertCircle className="w-5 h-5" />
               </button>
               <button
                 onClick={handleDismiss}
@@ -331,6 +388,28 @@ export function InstallPWA() {
                 <X className="w-5 h-5" />
               </button>
             </div>
+            
+            {/* Debug Info Panel */}
+            {showDebug && debugInfo.length > 0 && (
+              <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-xs font-semibold text-gray-700 mb-2">Debug Info:</p>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {debugInfo.map((msg, idx) => (
+                    <p key={idx} className="text-xs text-gray-600 font-mono">
+                      {msg}
+                    </p>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Status: {deferredPrompt ? '✅ Ready to Install' : '⏳ Waiting for prompt...'}
+                </p>
+                {!deferredPrompt && !isIOS && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    💡 Tip: Scroll or click around the page, then try installing again
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

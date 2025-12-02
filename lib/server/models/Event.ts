@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export interface IEvent extends mongoose.Document {
   title: string;
-  type: 'dinner' | 'cultural';
+  type: string; // Allow any string type
   description: string;
   venue: string;
   startTime: Date;
@@ -22,8 +22,8 @@ const eventSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['dinner', 'cultural'],
-    required: true
+    required: true,
+    trim: true
   },
   description: {
     type: String,
@@ -57,5 +57,22 @@ const eventSchema = new mongoose.Schema({
 
 eventSchema.index({ startTime: 1 });
 
-export const Event = mongoose.models.Event || mongoose.model<IEvent>('Event', eventSchema);
+// Ensure the type field doesn't have enum validation
+// If the model already exists, update the schema path
+if (mongoose.models.Event) {
+  const existingSchema = mongoose.models.Event.schema;
+  const typePath = existingSchema.path('type');
+  if (typePath && typePath.enumValues) {
+    // Remove enum validation by updating the path
+    typePath.enumValues = undefined;
+    typePath.enum = undefined;
+  }
+}
+
+// Delete and recreate the model to ensure fresh schema
+if (mongoose.models.Event) {
+  delete mongoose.models.Event;
+}
+
+export const Event = mongoose.model<IEvent>('Event', eventSchema);
 
