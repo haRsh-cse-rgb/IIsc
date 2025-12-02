@@ -2,6 +2,6 @@
   "/page": "app/page.js",
   "/programs/page": "app/programs/page.js",
   "/halls/page": "app/halls/page.js",
-  "/maps/page": "app/maps/page.js",
-  "/complaints/page": "app/complaints/page.js"
+  "/complaints/page": "app/complaints/page.js",
+  "/maps/page": "app/maps/page.js"
 }

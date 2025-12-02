@@ -19,6 +19,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
+  const [showIOSModal, setShowIOSModal] = useState(false);
   const { user, isAuthenticated, isAdmin, isVolunteer } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -58,49 +59,52 @@ export const Layout = ({ children }: LayoutProps) => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // For iOS, show install button if not already installed
+    // For iOS, show install button immediately (no beforeinstallprompt on iOS)
     if (isIOS && !isStandalone) {
       setShowInstallButton(true);
+    } else {
+      // For Android/Desktop: Show button after a short delay
+      // This gives time for beforeinstallprompt to fire, but shows button even if it doesn't
+      const timer = setTimeout(() => {
+        setShowInstallButton(true);
+      }, 1000);
+      
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      };
     }
-
-    // On desktop browsers, sometimes the prompt is delayed
-    // Show button after a short delay to give time for the prompt
-    const timer = setTimeout(() => {
-      setShowInstallButton(prev => {
-        // Only show if not already installed and we haven't received a prompt yet
-        if (!isStandalone) {
-          return true; // Show button for manual installation instructions
-        }
-        return prev;
-      });
-    }, 3000);
     
     return () => {
-      clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      // Show the install prompt
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-      } else {
-        console.log('User dismissed the install prompt');
+      // Android/Desktop: Show native install prompt (one-click install!)
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          console.log('App installed successfully!');
+        }
+        
+        setDeferredPrompt(null);
+        setShowInstallButton(false);
+      } catch (error) {
+        console.error('Install prompt error:', error);
       }
-      
-      setDeferredPrompt(null);
-      setShowInstallButton(false);
     } else {
-      // For iOS or browsers without beforeinstallprompt
-      alert('To install this app:\n\n' +
-        'iOS Safari: Tap the Share button, then "Add to Home Screen"\n' +
-        'Android Chrome: Tap the menu (3 dots) and select "Install App" or "Add to Home Screen"\n' +
-        'Other browsers: Look for an install icon in the address bar');
+      // iOS Safari: Show visual instructions modal
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) {
+        setShowIOSModal(true);
+      } else {
+        // Fallback for other browsers
+        setShowIOSModal(true);
+      }
     }
   };
 
@@ -225,6 +229,64 @@ export const Layout = ({ children }: LayoutProps) => {
           showInstallButton ? 'hidden md:block' : 'block'
         }`}>
           {user?.name} ({user?.role})
+        </div>
+      )}
+
+      {/* iOS Install Instructions Modal */}
+      {showIOSModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Install App</h2>
+              <button
+                onClick={() => setShowIOSModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                  1
+                </div>
+                <div>
+                  <p className="text-gray-800 font-medium">Tap the Share button</p>
+                  <p className="text-gray-600 text-sm">Look for the share icon at the bottom of your screen</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                  2
+                </div>
+                <div>
+                  <p className="text-gray-800 font-medium">Select "Add to Home Screen"</p>
+                  <p className="text-gray-600 text-sm">Scroll down in the share menu to find this option</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                  3
+                </div>
+                <div>
+                  <p className="text-gray-800 font-medium">Tap "Add"</p>
+                  <p className="text-gray-600 text-sm">The app will appear on your home screen!</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowIOSModal(false)}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
