@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { MapPin, Navigation, Building, Home as HomeIcon, Utensils } from 'lucide-react';
 import { Layout } from '@/src/components/Layout';
 
@@ -12,6 +13,10 @@ interface Location {
 }
 
 export default function MapsPage() {
+  useEffect(() => {
+    document.title = 'Maps & Navigation - STIS Conference';
+  }, []);
+
   const locations: Location[] = [
     {
       name: 'Main Campus Entrance',
@@ -35,10 +40,10 @@ export default function MapsPage() {
       color: 'purple'
     },
     {
-      name: 'Dining Hall',
-      address: 'Central Dining Facility, IISc',
-      coordinates: '13.0220,77.5655',
-      icon: Utensils,
+      name: 'Centenary Visitors House',
+      address: 'Centenary Visitors House, IISc',
+      coordinates: '13.027280207512606, 77.57049980697987',
+      icon: HomeIcon,
       color: 'orange'
     },
     {

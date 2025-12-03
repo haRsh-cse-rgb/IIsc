@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MessageCircle, Send, CheckCircle } from 'lucide-react';
 import { api } from '@/src/lib/api';
 import { Layout } from '@/src/components/Layout';
 
 export default function ComplaintsPage() {
+  useEffect(() => {
+    document.title = 'Complaints, Queries & Feedback - STIS Conference';
+  }, []);
+
   const [formData, setFormData] = useState({
     category: 'other',
     priority: 'medium',

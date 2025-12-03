@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { LogIn, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { LogIn } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  useEffect(() => {
+    document.title = 'Admin Login - STIS Conference';
+  }, []);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,8 +37,8 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-10 h-10 text-white" />
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-md">
+              <img src="/orlg.png" alt="Logo" className="w-full h-full object-contain p-2" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900">STIS Conference</h1>
             <p className="text-gray-600 mt-2">Admin Login</p>

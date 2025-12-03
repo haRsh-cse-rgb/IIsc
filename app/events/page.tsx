@@ -14,6 +14,10 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = 'Events - STIS Conference';
+  }, []);
+
+  useEffect(() => {
     loadEvents();
 
     socketClient.connect();

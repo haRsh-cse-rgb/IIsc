@@ -19,6 +19,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    document.title = 'Admin Panel - STIS Conference';
+  }, []);
+
+  useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
     }

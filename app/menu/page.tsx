@@ -12,6 +12,10 @@ export default function MenuPage() {
   const [selectedDay, setSelectedDay] = useState<number>(1);
 
   useEffect(() => {
+    document.title = 'Menu - STIS Conference';
+  }, []);
+
+  useEffect(() => {
     loadMenus();
   }, []);
 

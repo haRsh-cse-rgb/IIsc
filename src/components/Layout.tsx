@@ -5,6 +5,7 @@ import { Menu, X, Home, Calendar, Users, MapPin, MessageCircle, Utensils, Settin
 import { useAuth } from '../contexts/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { InstallButton } from './layout/InstallButton';
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,56 +18,52 @@ export const Layout = ({ children }: LayoutProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Only register service worker in production or when explicitly needed
+    // Register service worker for PWA support
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
       return;
     }
 
-    // Check if service worker file exists before registering
     const registerServiceWorker = async () => {
       try {
-        // First, try to unregister any existing problematic service workers
-        try {
-          const registrations = await navigator.serviceWorker.getRegistrations();
-          for (const registration of registrations) {
-            // Check if the registration is valid
-            try {
-              await registration.update();
-            } catch (updateError) {
-              // If update fails, unregister the problematic service worker
-              console.warn('Unregistering problematic service worker:', registration.scope);
-              await registration.unregister();
-            }
-          }
-        } catch (unregisterError) {
-          // Ignore errors during cleanup
-        }
-
-        // Check if the service worker file is accessible
-        try {
-          const response = await fetch('/sw.js', { method: 'HEAD' });
-          if (!response.ok) {
-            console.warn('⚠️ Service worker file not found, skipping registration');
-            return;
-          }
-        } catch (fetchError) {
-          console.warn('⚠️ Could not check service worker file, skipping registration');
+        // Check if service worker file is accessible
+        const response = await fetch('/sw.js', { method: 'HEAD' });
+        if (!response.ok) {
+          console.warn('⚠️ Service worker file not found');
           return;
         }
 
         // Register the service worker
-        const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-        console.log('✅ Service Worker registered:', registration);
+        const registration = await navigator.serviceWorker.register('/sw.js', { 
+          scope: '/',
+          updateViaCache: 'none' // Always check for updates
+        });
+        
+        console.log('✅ Service Worker registered successfully');
+        
+        // Check for updates
+        registration.addEventListener('updatefound', () => {
+          console.log('🔄 Service Worker update found');
+        });
+
+        // Handle service worker updates
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('🔄 New service worker activated');
+          }
+        });
       } catch (error) {
-        // Silently handle all errors - service worker is optional for PWA install
-        // Don't show errors to user as this is not critical
-        console.warn('⚠️ Service Worker registration skipped (non-critical):', error);
+        console.error('❌ Service Worker registration failed:', error);
       }
     };
 
-    // Delay registration slightly to ensure page is loaded
-    const timer = setTimeout(registerServiceWorker, 1000);
-    return () => clearTimeout(timer);
+    // Register immediately when page loads
+    if (document.readyState === 'complete') {
+      registerServiceWorker();
+    } else {
+      window.addEventListener('load', registerServiceWorker);
+    }
   }, []);
 
 
@@ -90,11 +87,11 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-blue-600" />
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                <img src="/orlg.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">STIS Conference</h1>
+                <h1 className="text-xl font-bold">STIS-V Conference</h1>
                 <p className="text-xs text-blue-100">IISc Bangalore</p>
               </div>
             </div>
@@ -164,6 +161,9 @@ export const Layout = ({ children }: LayoutProps) => {
           {user?.name} ({user?.role})
         </div>
       )}
+
+      {/* Install PWA Button */}
+      <InstallButton />
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { AuthProvider } from '@/src/contexts/AuthContext';
-import { InstallPWA } from '@/src/components/layout/InstallPWA';
 import '@/src/index.css';
 
 export const metadata: Metadata = {
@@ -15,8 +14,13 @@ export const metadata: Metadata = {
     title: 'STIS-V',
   },
   icons: {
-    icon: '/icon-192.png',
-    apple: '/icon-192.png',
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
   },
 };
 
@@ -30,6 +34,8 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#16a34a" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -39,7 +45,6 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           {children}
-          <InstallPWA />
         </AuthProvider>
       </body>
     </html>

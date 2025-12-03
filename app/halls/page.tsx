@@ -13,6 +13,10 @@ export default function HallsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = 'Halls Dashboard - STIS Conference';
+  }, []);
+
+  useEffect(() => {
     loadHallStatus();
 
     const interval = setInterval(loadHallStatus, 60000);

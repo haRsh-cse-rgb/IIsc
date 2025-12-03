@@ -58,7 +58,11 @@ export function InstallPWA() {
 
     // For iOS, show banner immediately (no beforeinstallprompt event)
     if (checkIOS) {
-      setShowBanner(true);
+      // Check if user dismissed it before showing
+      const dismissed = sessionStorage.getItem('pwa-install-dismissed');
+      if (dismissed !== 'true') {
+        setShowBanner(true);
+      }
       return;
     }
 
@@ -66,6 +70,13 @@ export function InstallPWA() {
 
     // Listen for beforeinstallprompt event (Android/Chrome)
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Check if user dismissed it before showing
+      const dismissed = sessionStorage.getItem('pwa-install-dismissed');
+      if (dismissed === 'true') {
+        addDebugMessage('Banner dismissed - ignoring install prompt');
+        return;
+      }
+      
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
       setDeferredPrompt(promptEvent);
@@ -112,6 +123,13 @@ export function InstallPWA() {
     // Fallback: Show banner after a delay if prompt hasn't fired yet
     // This helps when the prompt event is delayed or requires user interaction
     fallbackTimer = setTimeout(() => {
+      // Check if user dismissed it before showing
+      const dismissed = sessionStorage.getItem('pwa-install-dismissed');
+      if (dismissed === 'true') {
+        addDebugMessage('Banner dismissed - not showing fallback');
+        return;
+      }
+      
       setShowBanner((prev) => {
         // Only show if we still don't have a prompt and not installed
         if (!prev && !checkIOS && !isInstalled) {

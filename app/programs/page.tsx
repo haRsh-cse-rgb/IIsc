@@ -17,6 +17,10 @@ export default function ProgramsPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
+    document.title = 'Programs - STIS Conference';
+  }, []);
+
+  useEffect(() => {
     loadSchedules();
     loadFavorites();
 
