@@ -433,6 +433,7 @@ function SchedulesTab() {
     tags: string;
     slideLink: string;
     description: string;
+    isPlenary: boolean;
   }>({
     title: '',
     authors: '',
@@ -443,6 +444,7 @@ function SchedulesTab() {
     tags: '',
     slideLink: '',
     description: '',
+    isPlenary: false,
   });
 
   useEffect(() => {
@@ -475,10 +477,19 @@ function SchedulesTab() {
     e.preventDefault();
     try {
       const data = {
-        ...formData,
+        title: formData.title,
+        authors: formData.authors,
         hall: formData.hall,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        status: formData.status,
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        slideLink: formData.slideLink || undefined,
+        description: formData.description || undefined,
+        isPlenary: Boolean(formData.isPlenary), // Explicitly convert to boolean
       };
+      console.log('Submitting schedule data - formData.isPlenary:', formData.isPlenary, 'data.isPlenary:', data.isPlenary);
+      console.log('Full data object:', JSON.stringify(data, null, 2));
       if (editing) {
         await api.updateSchedule(editing._id, data);
       } else {
@@ -488,16 +499,19 @@ function SchedulesTab() {
       setEditing(null);
       setFormData({
         title: '', authors: '', hall: '', startTime: '', endTime: '',
-        status: 'upcoming', tags: '', slideLink: '', description: '',
+        status: 'upcoming', tags: '', slideLink: '', description: '', isPlenary: false,
       });
       loadData();
     } catch (error) {
+      console.error('Error saving schedule:', error);
       alert('Failed to save schedule');
     }
   };
 
   const handleEdit = (schedule: Schedule) => {
     setEditing(schedule);
+      console.log('Editing schedule:', schedule);
+      console.log('isPlenary value:', schedule.isPlenary, typeof schedule.isPlenary);
     setFormData({
       title: schedule.title,
       authors: schedule.authors,
@@ -508,6 +522,7 @@ function SchedulesTab() {
       tags: schedule.tags.join(', '),
       slideLink: schedule.slideLink || '',
       description: schedule.description || '',
+      isPlenary: schedule.isPlenary === true || schedule.isPlenary === 'true' || false,
     });
     setShowForm(true);
   };
@@ -535,7 +550,7 @@ function SchedulesTab() {
             setEditing(null);
             setFormData({
               title: '', authors: '', hall: '', startTime: '', endTime: '',
-              status: 'upcoming', tags: '', slideLink: '', description: '',
+              status: 'upcoming', tags: '', slideLink: '', description: '', isPlenary: false,
             });
           }}
           className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -654,6 +669,20 @@ function SchedulesTab() {
                 className="w-full px-3 py-2 border rounded-lg"
                 rows={3}
               />
+            </div>
+            <div className="flex items-center space-x-3 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.isPlenary}
+                  onChange={(e) => setFormData({ ...formData, isPlenary: e.target.checked })}
+                  className="w-5 h-5 text-yellow-600 border-yellow-300 rounded focus:ring-yellow-500 focus:ring-2"
+                />
+                <div>
+                  <span className="text-sm font-semibold text-yellow-900">Plenary Lecture</span>
+                  <p className="text-xs text-yellow-700">Mark this as a plenary lecture (will display with golden design)</p>
+                </div>
+              </label>
             </div>
             <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
               <Save className="w-4 h-4 inline mr-2" />

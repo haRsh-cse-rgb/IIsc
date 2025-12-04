@@ -40,6 +40,7 @@ export interface Schedule {
   tags: string[];
   slideLink?: string;
   description?: string;
+  isPlenary?: boolean;
 }
 
 export interface HallStatus {

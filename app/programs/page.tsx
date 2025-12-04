@@ -290,39 +290,70 @@ export default function ProgramsPage() {
               <p>No programs found for the selected filters.</p>
             </div>
           ) : (
-            filteredSchedules.map((schedule) => (
-              <div
-                key={schedule._id}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">{schedule.title}</h3>
-                      <button
-                        onClick={() => toggleFavorite(schedule._id)}
-                        className={`p-1 rounded-full transition-colors ${
-                          favorites.has(schedule._id)
-                            ? 'text-yellow-500 hover:text-yellow-600'
-                            : 'text-gray-400 hover:text-gray-500'
-                        }`}
+            filteredSchedules.map((schedule) => {
+              const status = getCalculatedStatus(schedule);
+              const isPlenary = Boolean(schedule.isPlenary === true || schedule.isPlenary === 'true' || schedule.isPlenary === 1);
+              return (
+                <div
+                  key={schedule._id}
+                  className={`rounded-xl shadow-md hover:shadow-lg transition-all border-2 overflow-hidden ${
+                    isPlenary
+                      ? 'bg-gradient-to-br from-yellow-50 via-amber-50 to-yellow-100 border-yellow-300'
+                      : 'bg-white border-gray-100'
+                  }`}
+                >
+                  {/* Status Badge at top */}
+                  <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                    <div className="flex items-center space-x-2">
+                      {isPlenary && (
+                        <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900 border-2 border-yellow-600 shadow-md">
+                          PLENARY
+                        </span>
+                      )}
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold uppercase border ${getStatusColor(
+                          status
+                        )}`}
                       >
-                        <Star className={`w-5 h-5 ${favorites.has(schedule._id) ? 'fill-current' : ''}`} />
-                      </button>
+                        {status}
+                      </span>
                     </div>
-                    <p className="text-gray-600 mb-3">{schedule.authors}</p>
+                    <button
+                      onClick={() => toggleFavorite(schedule._id)}
+                      className={`p-1.5 rounded-full transition-all ${
+                        favorites.has(schedule._id)
+                          ? 'text-yellow-500 hover:text-yellow-600 bg-yellow-50'
+                          : 'text-gray-400 hover:text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Star className={`w-5 h-5 ${favorites.has(schedule._id) ? 'fill-current' : ''}`} />
+                    </button>
+                  </div>
 
-                    <div className="grid md:grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center space-x-2 text-gray-700">
-                        <Clock className="w-4 h-4" />
-                        <span>
+                  {/* Main Content */}
+                  <div className="px-4 pb-4">
+                    {/* Title - full display */}
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 leading-tight">
+                      {schedule.title}
+                    </h3>
+
+                    {/* Author */}
+                    <p className="text-sm md:text-base text-gray-600 mb-4 line-clamp-1">
+                      {schedule.authors}
+                    </p>
+
+                    {/* Time and Location - Stack on mobile, side by side on desktop */}
+                    <div className="space-y-2 mb-3">
+                      <div className="flex items-center space-x-2 text-sm text-gray-700">
+                        <Clock className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                        <span className="font-medium">
                           {format(new Date(schedule.startTime), 'h:mm a')} -{' '}
                           {format(new Date(schedule.endTime), 'h:mm a')}
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-2 text-gray-700">
-                        <MapPin className="w-4 h-4" />
+                      <div className="flex items-center space-x-2 text-sm text-gray-700">
+                        <MapPin className="w-4 h-4 flex-shrink-0 text-gray-500" />
                         <span>
                           {schedule.hall && typeof schedule.hall === 'object' && schedule.hall !== null
                             ? `${schedule.hall.name} (${schedule.hall.code})`
@@ -331,14 +362,15 @@ export default function ProgramsPage() {
                       </div>
                     </div>
 
+                    {/* Tags */}
                     {schedule.tags.length > 0 && (
-                      <div className="flex items-center space-x-2 mt-3">
-                        <Tag className="w-4 h-4 text-gray-500" />
-                        <div className="flex flex-wrap gap-2">
+                      <div className="flex items-start space-x-2 mb-3">
+                        <Tag className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <div className="flex flex-wrap gap-1.5">
                           {schedule.tags.map((tag, idx) => (
                             <span
                               key={idx}
-                              className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium"
+                              className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-md text-xs font-medium"
                             >
                               {tag}
                             </span>
@@ -346,38 +378,32 @@ export default function ProgramsPage() {
                         </div>
                       </div>
                     )}
-                  </div>
 
-                  <div className="flex flex-col items-end space-y-2">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold uppercase border ${getStatusColor(
-                        getCalculatedStatus(schedule)
-                      )}`}
-                    >
-                      {getCalculatedStatus(schedule)}
-                    </span>
+                    {/* Description */}
+                    {schedule.description && (
+                      <p className="text-gray-600 text-sm mt-3 pt-3 border-t border-gray-200 line-clamp-2">
+                        {schedule.description}
+                      </p>
+                    )}
 
+                    {/* Slides Link */}
                     {schedule.slideLink && (
-                      <a
-                        href={schedule.slideLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        <span>Slides</span>
-                      </a>
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <a
+                          href={schedule.slideLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          <span>View Slides</span>
+                        </a>
+                      </div>
                     )}
                   </div>
                 </div>
-
-                {schedule.description && (
-                  <p className="text-gray-600 text-sm mt-3 pt-3 border-t border-gray-200">
-                    {schedule.description}
-                  </p>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

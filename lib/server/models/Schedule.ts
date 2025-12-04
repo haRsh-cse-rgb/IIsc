@@ -10,6 +10,7 @@ export interface ISchedule extends mongoose.Document {
   tags: string[];
   slideLink?: string;
   description?: string;
+  isPlenary: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,6 +53,11 @@ const scheduleSchema = new mongoose.Schema({
   },
   description: {
     type: String
+  },
+  isPlenary: {
+    type: Boolean,
+    default: false,
+    required: false
   }
 }, {
   timestamps: true

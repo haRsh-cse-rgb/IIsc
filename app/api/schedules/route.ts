@@ -39,10 +39,22 @@ export async function GET(request: NextRequest) {
 
     const schedules = await Schedule.find(query)
       .populate('hall', 'name code location')
-      .sort({ startTime: 1 });
+      .sort({ startTime: 1 })
+      .lean();
+
+    // Ensure isPlenary is always included (default to false if missing)
+    const schedulesWithPlenary = schedules.map((schedule: any) => ({
+      ...schedule,
+      isPlenary: schedule.isPlenary === true || schedule.isPlenary === 'true' || schedule.isPlenary === 1 || false
+    }));
+
+    // Log to verify isPlenary is included
+    if (schedulesWithPlenary.length > 0) {
+      console.log('Sample schedule isPlenary:', schedulesWithPlenary[0]?.isPlenary);
+    }
 
     // Convert to plain objects using JSON serialization
-    const serialized = JSON.parse(JSON.stringify(schedules));
+    const serialized = JSON.parse(JSON.stringify(schedulesWithPlenary));
 
     console.log(`Returning ${serialized.length} schedules`);
     return NextResponse.json(serialized);
@@ -74,12 +86,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const scheduleResult = await Schedule.create(body);
+    // Explicitly include isPlenary field - ensure it's always a boolean
+    // Handle both true and false values explicitly
+    const isPlenaryValue = body.isPlenary === true || body.isPlenary === 'true' || body.isPlenary === 1 || body.isPlenary === '1';
+    
+    const scheduleData: any = {
+      title: body.title,
+      authors: body.authors,
+      hall: body.hall,
+      startTime: body.startTime,
+      endTime: body.endTime,
+      status: body.status || 'upcoming',
+      tags: body.tags || [],
+      slideLink: body.slideLink,
+      description: body.description,
+      isPlenary: Boolean(isPlenaryValue), // Always explicitly set, even if false
+    };
+    
+    console.log('Creating schedule - body.isPlenary:', body.isPlenary, 'typeof:', typeof body.isPlenary);
+    console.log('Creating schedule with data:', JSON.stringify(scheduleData, null, 2));
+    const scheduleResult = await Schedule.create(scheduleData);
     
     // Handle both single document and array cases
     const schedule = Array.isArray(scheduleResult) ? scheduleResult[0] : scheduleResult;
     const populated = await schedule.populate('hall', 'name code location');
+    
+    // Get fresh from DB to ensure all fields are included
+    const savedSchedule = await Schedule.findById(schedule._id).lean();
+    console.log('Saved schedule from DB - isPlenary:', savedSchedule?.isPlenary, 'Full object keys:', Object.keys(savedSchedule || {}));
+    
     const plainSchedule = populated.toObject ? populated.toObject() : populated;
+    
+    // Ensure isPlenary is always included in response (use saved value from DB)
+    if (plainSchedule && savedSchedule) {
+      plainSchedule.isPlenary = Boolean(savedSchedule.isPlenary === true || savedSchedule.isPlenary === 'true' || savedSchedule.isPlenary === 1);
+      console.log('Returning schedule with isPlenary:', plainSchedule.isPlenary);
+    } else if (plainSchedule) {
+      plainSchedule.isPlenary = Boolean(plainSchedule.isPlenary);
+    }
 
     const io = getSocketIO();
     if (io) {

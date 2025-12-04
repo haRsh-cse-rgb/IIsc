@@ -1,12 +1,88 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Utensils, Music, Calendar, MapPin, Clock, Ticket } from 'lucide-react';
 import { api } from '@/src/lib/api';
 import { socketClient } from '@/src/lib/socket';
 import { Event } from '@/src/types';
 import { format } from 'date-fns';
 import { Layout } from '@/src/components/Layout';
+
+function FilterButtonsWithScrollIndicator({
+  filter,
+  setFilter,
+  uniqueTypes,
+  getEventIcon,
+  getFilterButtonColor,
+  getTypeDisplayName,
+}: {
+  filter: string;
+  setFilter: (filter: string) => void;
+  uniqueTypes: string[];
+  getEventIcon: (type: string) => any;
+  getFilterButtonColor: (type: string, isActive: boolean) => string;
+  getTypeDisplayName: (type: string) => string;
+}) {
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const checkScrollability = () => {
+    if (!scrollContainerRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    const needsScrolling = scrollWidth > clientWidth;
+    setCanScrollLeft(needsScrolling && scrollLeft > 0);
+    setCanScrollRight(needsScrolling && scrollLeft < scrollWidth - clientWidth - 1);
+  };
+
+  useEffect(() => {
+    checkScrollability();
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollability);
+      window.addEventListener('resize', checkScrollability);
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', checkScrollability);
+      }
+      window.removeEventListener('resize', checkScrollability);
+    };
+  }, [uniqueTypes]);
+
+  return (
+    <div 
+      ref={scrollContainerRef}
+      className={`horizontal-scroll-container scroll-fade-left scroll-fade-right flex items-center space-x-3 pb-2 ${
+        canScrollLeft ? '' : 'scrolled-to-start'
+      } ${canScrollRight ? '' : 'scrolled-to-end'}`}
+    >
+      <button
+        onClick={() => setFilter('all')}
+        className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+          filter === 'all'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        }`}
+      >
+        All Events
+      </button>
+      {uniqueTypes.map((type) => {
+        const Icon = getEventIcon(type);
+        return (
+          <button
+            key={type}
+            onClick={() => setFilter(type)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${getFilterButtonColor(type, filter === type)}`}
+          >
+            <Icon className="w-4 h-4" />
+            <span>{getTypeDisplayName(type)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -123,31 +199,14 @@ export default function EventsPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center space-x-3 overflow-x-auto pb-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                filter === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              All Events
-            </button>
-            {uniqueTypes.map((type) => {
-              const Icon = getEventIcon(type);
-              return (
-                <button
-                  key={type}
-                  onClick={() => setFilter(type)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${getFilterButtonColor(type, filter === type)}`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{getTypeDisplayName(type)}</span>
-                </button>
-              );
-            })}
-          </div>
+          <FilterButtonsWithScrollIndicator
+            filter={filter}
+            setFilter={setFilter}
+            uniqueTypes={uniqueTypes}
+            getEventIcon={getEventIcon}
+            getFilterButtonColor={getFilterButtonColor}
+            getTypeDisplayName={getTypeDisplayName}
+          />
         </div>
 
         <div className="space-y-4">

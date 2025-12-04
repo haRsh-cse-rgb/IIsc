@@ -30,7 +30,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(schedule);
+    // Ensure isPlenary is always included (default to false if missing)
+    const scheduleWithPlenary = {
+      ...schedule,
+      isPlenary: schedule.isPlenary === true || schedule.isPlenary === 'true' || schedule.isPlenary === 1 || false
+    };
+
+    return NextResponse.json(scheduleWithPlenary);
   } catch (error) {
     console.error('Get schedule error:', error);
     return NextResponse.json(
@@ -55,13 +61,29 @@ export async function PUT(
     const user = requireRole(request, 'admin');
     const body = await request.json();
 
+    // Explicitly include isPlenary field - ensure it's always a boolean
+    // Handle both true and false values explicitly
+    const isPlenaryValue = body.isPlenary === true || body.isPlenary === 'true' || body.isPlenary === 1 || body.isPlenary === '1';
+    
+    // Build update data - always include isPlenary explicitly
+    const updateData: any = {
+      ...body,
+      isPlenary: Boolean(isPlenaryValue), // Always explicitly set, even if false
+    };
+    
+    console.log('Updating schedule - body.isPlenary:', body.isPlenary, 'typeof:', typeof body.isPlenary);
+    console.log('Updating schedule with data:', JSON.stringify(updateData, null, 2));
+    
     const schedule = await Schedule.findByIdAndUpdate(
       params.id,
-      body,
+      updateData, // Explicitly include isPlenary in the update
       { new: true, runValidators: true }
     )
       .populate('hall', 'name code location')
       .lean();
+    
+    // Verify it was saved
+    console.log('Updated schedule isPlenary value:', schedule?.isPlenary);
 
     if (!schedule) {
       return NextResponse.json(
