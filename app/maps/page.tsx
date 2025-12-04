@@ -37,7 +37,7 @@ export default function MapsPage() {
       address: 'Satish Dhawan Auditorium, IISc',
       coordinates: '13.013859198158057, 77.56938281772588',
       icon: Building,
-      color: 'purple'
+      color: 'yellow'
     },
     {
       name: 'Centenary Visitors House',
@@ -47,11 +47,25 @@ export default function MapsPage() {
       color: 'orange'
     },
     {
-      name: 'Guest House',
-      address: 'IISc Guest House, Malleshwaram',
-      coordinates: '13.0210,77.5660',
+      name: 'Main Guest House',
+      address: 'IISc Main Guest House, IISc Campus',
+      coordinates: '13.021508, 77.568430',
+      icon: HomeIcon,
+      color: 'purple'
+    },
+    {
+      name: 'Jawahar Visitor House (JVH)',
+      address: 'IISc Jawahar Visitor House (JVH), IISc Campus',
+      coordinates: '13.016869332814236, 77.5595396798998',
       icon: HomeIcon,
       color: 'red'
+    },
+    {
+      name: 'National Institute of Advanced Studies (NIAS) guest house',
+      address: 'National Institute of Advanced Studies (NIAS) guest house, IISc Campus',
+      coordinates: '13.029405632885375, 77.56291226431053',
+      icon: HomeIcon,
+      color: 'green'
     }
   ];
 
@@ -134,7 +148,7 @@ export default function MapsPage() {
           <h3 className="font-bold text-lg text-blue-900 mb-2">Need Help?</h3>
           <p className="text-blue-800 text-sm">
             If you're having trouble finding a location, please visit the Registration Desk or contact a volunteer.
-            Emergency contact: +91-80-2293-2001
+            Emergency contact: +91-8949099342 | +91-9572301358
           </p>
         </div>
       </div>

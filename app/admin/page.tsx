@@ -763,6 +763,17 @@ function ComplaintsTab() {
     setShowForm(true);
   };
 
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this complaint?')) {
+      try {
+        await api.deleteComplaint(id);
+        loadComplaints();
+      } catch (error) {
+        alert('Failed to delete complaint');
+      }
+    }
+  };
+
   if (loading) return <div className="text-center py-12">Loading...</div>;
 
   return (
@@ -851,6 +862,12 @@ function ComplaintsTab() {
                   className="p-2 text-blue-600 hover:bg-blue-50 rounded"
                 >
                   <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(complaint._id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>

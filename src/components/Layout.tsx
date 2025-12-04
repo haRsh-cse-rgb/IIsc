@@ -25,8 +25,30 @@ export const Layout = ({ children }: LayoutProps) => {
 
     const registerServiceWorker = async () => {
       try {
+        // Unregister all existing service workers first to clear old caches
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+          console.log('🗑️ Unregistered old service worker');
+        }
+
+        // Clear all caches
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => {
+            console.log('🗑️ Deleting cache:', cacheName);
+            return caches.delete(cacheName);
+          })
+        );
+
+        // Wait a bit before registering new one
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         // Check if service worker file is accessible
-        const response = await fetch('/sw.js', { method: 'HEAD' });
+        const response = await fetch('/sw.js', { 
+          method: 'HEAD',
+          cache: 'no-store' // Don't cache this check
+        });
         if (!response.ok) {
           console.warn('⚠️ Service worker file not found');
           return;
@@ -40,18 +62,27 @@ export const Layout = ({ children }: LayoutProps) => {
         
         console.log('✅ Service Worker registered successfully');
         
-        // Check for updates
+        // Check for updates immediately
+        await registration.update();
+        
+        // Listen for updates
         registration.addEventListener('updatefound', () => {
           console.log('🔄 Service Worker update found');
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'activated') {
+                console.log('🔄 New service worker activated - reloading page');
+                // Reload to get new service worker
+                window.location.reload();
+              }
+            });
+          }
         });
 
-        // Handle service worker updates
-        let refreshing = false;
+        // Handle service worker controller change
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!refreshing) {
-            refreshing = true;
-            console.log('🔄 New service worker activated');
-          }
+          console.log('🔄 Service worker controller changed');
         });
       } catch (error) {
         console.error('❌ Service Worker registration failed:', error);

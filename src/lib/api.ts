@@ -182,6 +182,12 @@ export class ApiClient {
     });
   }
 
+  async deleteComplaint(id: string) {
+    return this.request<any>(`/complaints/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   async getEvents(params?: { type?: string; upcoming?: boolean }) {
     const query = new URLSearchParams(params as any).toString();
     return this.request<any[]>(`/events${query ? `?${query}` : ''}`);
