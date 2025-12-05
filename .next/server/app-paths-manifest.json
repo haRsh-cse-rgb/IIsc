@@ -1,7 +1,10 @@
 {
-  "/admin/page": "app/admin/page.js",
-  "/events/page": "app/events/page.js",
-  "/halls/page": "app/halls/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
-  "/api/halls/status/route": "app/api/halls/status/route.js"
+  "/events/page": "app/events/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/halls/page": "app/halls/page.js",
+  "/api/schedules/[id]/route": "app/api/schedules/[id]/route.js",
+  "/api/schedules/route": "app/api/schedules/route.js",
+  "/api/halls/route": "app/api/halls/route.js"
 }

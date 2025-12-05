@@ -427,7 +427,9 @@ function SchedulesTab() {
     title: string;
     authors: string;
     hall: string;
+    startDate: string;
     startTime: string;
+    endDate: string;
     endTime: string;
     status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
     tags: string;
@@ -438,7 +440,9 @@ function SchedulesTab() {
     title: '',
     authors: '',
     hall: '',
+    startDate: '',
     startTime: '',
+    endDate: '',
     endTime: '',
     status: 'upcoming',
     tags: '',
@@ -473,15 +477,45 @@ function SchedulesTab() {
     }
   };
 
+  // Helper function to convert 12-hour time to 24-hour format
+  const convertTo24Hour = (time12h: string): string => {
+    const [time, period] = time12h.split(' ');
+    const [hours, minutes] = time.split(':');
+    let hour24 = parseInt(hours);
+    if (period === 'PM' && hour24 !== 12) {
+      hour24 += 12;
+    } else if (period === 'AM' && hour24 === 12) {
+      hour24 = 0;
+    }
+    return `${hour24.toString().padStart(2, '0')}:${minutes}`;
+  };
+
+  // Helper function to convert 24-hour time to 12-hour format
+  const convertTo12Hour = (time24h: string): string => {
+    const [hours, minutes] = time24h.split(':');
+    let hour12 = parseInt(hours);
+    const period = hour12 >= 12 ? 'PM' : 'AM';
+    if (hour12 === 0) {
+      hour12 = 12;
+    } else if (hour12 > 12) {
+      hour12 -= 12;
+    }
+    return `${hour12.toString().padStart(2, '0')}:${minutes} ${period}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Combine date and time, converting 12-hour to 24-hour format
+      const startTime24 = convertTo24Hour(formData.startTime);
+      const endTime24 = convertTo24Hour(formData.endTime);
+      
       const data = {
         title: formData.title,
         authors: formData.authors,
         hall: formData.hall,
-        startTime: formData.startTime,
-        endTime: formData.endTime,
+        startTime: `${formData.startDate}T${startTime24}:00`,
+        endTime: `${formData.endDate}T${endTime24}:00`,
         status: formData.status,
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
         slideLink: formData.slideLink || undefined,
@@ -498,7 +532,7 @@ function SchedulesTab() {
       setShowForm(false);
       setEditing(null);
       setFormData({
-        title: '', authors: '', hall: '', startTime: '', endTime: '',
+        title: '', authors: '', hall: '', startDate: '', startTime: '', endDate: '', endTime: '',
         status: 'upcoming', tags: '', slideLink: '', description: '', isPlenary: false,
       });
       loadData();
@@ -512,12 +546,18 @@ function SchedulesTab() {
     setEditing(schedule);
       console.log('Editing schedule:', schedule);
       console.log('isPlenary value:', schedule.isPlenary, typeof schedule.isPlenary);
+    
+    const startDate = new Date(schedule.startTime);
+    const endDate = new Date(schedule.endTime);
+    
     setFormData({
       title: schedule.title,
       authors: schedule.authors,
       hall: typeof schedule.hall === 'object' && schedule.hall !== null ? schedule.hall._id : (schedule.hall || ''),
-      startTime: format(new Date(schedule.startTime), "yyyy-MM-dd'T'HH:mm"),
-      endTime: format(new Date(schedule.endTime), "yyyy-MM-dd'T'HH:mm"),
+      startDate: format(startDate, 'yyyy-MM-dd'),
+      startTime: convertTo12Hour(format(startDate, 'HH:mm')),
+      endDate: format(endDate, 'yyyy-MM-dd'),
+      endTime: convertTo12Hour(format(endDate, 'HH:mm')),
       status: schedule.status,
       tags: schedule.tags.join(', '),
       slideLink: schedule.slideLink || '',
@@ -549,7 +589,7 @@ function SchedulesTab() {
             setShowForm(true);
             setEditing(null);
             setFormData({
-              title: '', authors: '', hall: '', startTime: '', endTime: '',
+              title: '', authors: '', hall: '', startDate: '', startTime: '', endDate: '', endTime: '',
               status: 'upcoming', tags: '', slideLink: '', description: '', isPlenary: false,
             });
           }}
@@ -622,24 +662,126 @@ function SchedulesTab() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Start Time</label>
+                <label className="block text-sm font-medium mb-1">Start Date</label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   required
-                  value={formData.startTime}
-                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Start Time</label>
+                <div className="flex items-center space-x-2">
+                  <select
+                    required
+                    value={formData.startTime.split(':')[0] || '09'}
+                    onChange={(e) => {
+                      const [hour, rest] = formData.startTime.split(':');
+                      const [min, period] = rest ? rest.split(' ') : ['00', 'AM'];
+                      setFormData({ ...formData, startTime: `${e.target.value}:${min} ${period}` });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
+                      <option key={hour} value={hour.toString().padStart(2, '0')}>
+                        {hour}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-gray-500">:</span>
+                  <select
+                    required
+                    value={formData.startTime.split(':')[1]?.split(' ')[0] || '00'}
+                    onChange={(e) => {
+                      const [hour, rest] = formData.startTime.split(':');
+                      const period = rest ? rest.split(' ')[1] || 'AM' : 'AM';
+                      setFormData({ ...formData, startTime: `${hour}:${e.target.value} ${period}` });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
+                  >
+                    {Array.from({ length: 60 }, (_, i) => i).map(min => (
+                      <option key={min} value={min.toString().padStart(2, '0')}>
+                        {min.toString().padStart(2, '0')}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    required
+                    value={formData.startTime.split(' ')[1] || 'AM'}
+                    onChange={(e) => {
+                      const [time] = formData.startTime.split(' ');
+                      setFormData({ ...formData, startTime: `${time} ${e.target.value}` });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">End Date</label>
+                <input
+                  type="date"
+                  required
+                  value={formData.endDate}
+                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">End Time</label>
-                <input
-                  type="datetime-local"
-                  required
-                  value={formData.endTime}
-                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
+                <div className="flex items-center space-x-2">
+                  <select
+                    required
+                    value={formData.endTime.split(':')[0] || '10'}
+                    onChange={(e) => {
+                      const [hour, rest] = formData.endTime.split(':');
+                      const [min, period] = rest ? rest.split(' ') : ['00', 'AM'];
+                      setFormData({ ...formData, endTime: `${e.target.value}:${min} ${period}` });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
+                      <option key={hour} value={hour.toString().padStart(2, '0')}>
+                        {hour}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-gray-500">:</span>
+                  <select
+                    required
+                    value={formData.endTime.split(':')[1]?.split(' ')[0] || '00'}
+                    onChange={(e) => {
+                      const [hour, rest] = formData.endTime.split(':');
+                      const period = rest ? rest.split(' ')[1] || 'AM' : 'AM';
+                      setFormData({ ...formData, endTime: `${hour}:${e.target.value} ${period}` });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
+                  >
+                    {Array.from({ length: 60 }, (_, i) => i).map(min => (
+                      <option key={min} value={min.toString().padStart(2, '0')}>
+                        {min.toString().padStart(2, '0')}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    required
+                    value={formData.endTime.split(' ')[1] || 'AM'}
+                    onChange={(e) => {
+                      const [time] = formData.endTime.split(' ');
+                      setFormData({ ...formData, endTime: `${time} ${e.target.value}` });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
               </div>
             </div>
             <div>
