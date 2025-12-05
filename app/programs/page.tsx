@@ -292,7 +292,7 @@ export default function ProgramsPage() {
           ) : (
             filteredSchedules.map((schedule) => {
               const status = getCalculatedStatus(schedule);
-              const isPlenary = Boolean(schedule.isPlenary === true || schedule.isPlenary === 'true' || schedule.isPlenary === 1);
+              const isPlenary = Boolean(schedule.isPlenary);
               return (
                 <div
                   key={schedule._id}

@@ -102,3 +102,19 @@
 .scroll-fade-right.scrolled-to-end::after {
   opacity: 0;
 }
+
+/* Fade-in animation for notifications */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}

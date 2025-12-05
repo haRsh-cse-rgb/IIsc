@@ -193,9 +193,9 @@ export default function EventsPage() {
         <div className="bg-gradient-to-r from-pink-600 to-pink-700 rounded-xl shadow-lg p-8 text-white">
           <div className="flex items-center space-x-3 mb-3">
             <Utensils className="w-8 h-8" />
-            <h1 className="text-3xl font-bold">Dinners & Cultural Events</h1>
+            <h1 className="text-3xl font-bold">STIS-V Events</h1>
           </div>
-          <p className="text-pink-100">Join us for evening social events and cultural programs</p>
+          <p className="text-pink-100">Join us for evening social events and cultural programs at STIS-V</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-6">

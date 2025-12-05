@@ -3,7 +3,7 @@ import { Event } from '@/lib/server/models/Event';
 import { connectDatabase } from '@/lib/server/database';
 import { requireRole } from '@/lib/server/auth';
 import { createAuditLog } from '@/lib/server/audit';
-import { getSocketIO } from '@/lib/server/socket';
+import { emitSocketEvent } from '@/lib/server/socket';
 
 export async function GET(
   request: NextRequest,
@@ -76,10 +76,7 @@ export async function PUT(
       _id: event._id.toString()
     };
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('event:update', serialized);
-    }
+    await emitSocketEvent('event:update', serialized);
 
     const response = NextResponse.json(serialized);
     await createAuditLog(request, response, user, 'update', 'event', params.id, body);
@@ -116,10 +113,7 @@ export async function DELETE(
       );
     }
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('event:delete', { id: params.id });
-    }
+    await emitSocketEvent('event:delete', { id: params.id });
 
     const response = NextResponse.json({ message: 'Event deleted successfully' });
     await createAuditLog(request, response, user, 'delete', 'event', params.id, {});

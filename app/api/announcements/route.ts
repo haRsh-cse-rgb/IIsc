@@ -5,7 +5,7 @@ import { User, userSchema } from '@/lib/server/models/User';
 import { connectDatabase } from '@/lib/server/database';
 import { requireRole, getAuthUser } from '@/lib/server/auth';
 import { createAuditLog } from '@/lib/server/audit';
-import { getSocketIO } from '@/lib/server/socket';
+import { emitSocketEvent } from '@/lib/server/socket';
 
 export async function GET(request: NextRequest) {
   try {
@@ -78,10 +78,7 @@ export async function POST(request: NextRequest) {
     const populated = await announcement.populate('createdBy', 'name email');
     const plainAnnouncement = populated.toObject ? populated.toObject() : populated;
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('announcement:new', plainAnnouncement);
-    }
+    await emitSocketEvent('announcement:new', plainAnnouncement);
 
     const response = NextResponse.json(plainAnnouncement, { status: 201 });
     await createAuditLog(request, response, user, 'create', 'announcement', populated._id.toString(), body);

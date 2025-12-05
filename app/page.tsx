@@ -13,7 +13,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Home - STIS-V Conference';
+    document.title = 'Home - STIS-V';
   }, []);
 
   useEffect(() => {

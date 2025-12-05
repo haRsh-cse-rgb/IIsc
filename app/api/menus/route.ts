@@ -4,7 +4,7 @@ import { Menu, menuSchema } from '@/lib/server/models/Menu';
 import { connectDatabase } from '@/lib/server/database';
 import { requireRole } from '@/lib/server/auth';
 import { createAuditLog } from '@/lib/server/audit';
-import { getSocketIO } from '@/lib/server/socket';
+import { emitSocketEvent } from '@/lib/server/socket';
 
 export async function GET(request: NextRequest) {
   try {
@@ -74,10 +74,7 @@ export async function POST(request: NextRequest) {
         { new: true, runValidators: true }
       );
 
-      const io = getSocketIO();
-      if (io) {
-        io.emit('menu:update', menu);
-      }
+      await emitSocketEvent('menu:update', menu);
 
       const response = NextResponse.json(menu, { status: 200 });
       await createAuditLog(request, response, user, 'update', 'menu', menu._id.toString(), body);
@@ -89,10 +86,7 @@ export async function POST(request: NextRequest) {
       // Handle both single document and array cases
       const menu = Array.isArray(menuResult) ? menuResult[0] : menuResult;
 
-      const io = getSocketIO();
-      if (io) {
-        io.emit('menu:new', menu);
-      }
+      await emitSocketEvent('menu:new', menu);
 
       const response = NextResponse.json(menu, { status: 201 });
       await createAuditLog(request, response, user, 'create', 'menu', menu._id.toString(), body);

@@ -522,7 +522,7 @@ function SchedulesTab() {
       tags: schedule.tags.join(', '),
       slideLink: schedule.slideLink || '',
       description: schedule.description || '',
-      isPlenary: schedule.isPlenary === true || schedule.isPlenary === 'true' || false,
+      isPlenary: schedule.isPlenary ?? false,
     });
     setShowForm(true);
   };

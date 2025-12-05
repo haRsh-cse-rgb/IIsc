@@ -11,17 +11,36 @@ import { Layout } from '@/src/components/Layout';
 export default function HallsPage() {
   const [hallStatuses, setHallStatuses] = useState<HallStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     document.title = 'Halls Dashboard - STIS Conference';
   }, []);
 
+  // Update current time every 30 seconds for accurate time remaining calculations
+  useEffect(() => {
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 30000); // Update every 30 seconds
+
+    return () => clearInterval(timeInterval);
+  }, []);
+
   useEffect(() => {
     loadHallStatus();
 
-    const interval = setInterval(loadHallStatus, 60000);
-
+    // Try to connect Socket.IO
     socketClient.connect();
+    
+    // Use frequent polling by default (for production/Vercel where Socket.IO doesn't work)
+    // This ensures data stays fresh even without real-time updates
+    const pollInterval = 10000; // 10 seconds - frequent enough to feel responsive
+    
+    const interval = setInterval(() => {
+      loadHallStatus();
+    }, pollInterval);
+
+    // Set up Socket.IO listener for real-time updates (will work if Socket.IO is available)
     socketClient.on('schedule:update', () => {
       loadHallStatus();
     });
@@ -34,10 +53,13 @@ export default function HallsPage() {
 
   const loadHallStatus = async () => {
     try {
+      console.log('[Halls] Fetching hall status...', new Date().toISOString());
       const data = await api.getHallStatus();
+      console.log('[Halls] Received data:', data.length, 'halls');
       setHallStatuses(data);
     } catch (error) {
-      console.error('Failed to load hall status:', error);
+      console.error('[Halls] Failed to load hall status:', error);
+      // Don't clear existing data on error, just log it
     } finally {
       setLoading(false);
     }
@@ -82,10 +104,12 @@ export default function HallsPage() {
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
                       Current Session
                     </h3>
-                    {status.timeRemaining !== null && (
+                    {status.current && (
                       <div className="flex items-center space-x-1 text-sm font-medium text-green-600">
                         <Clock className="w-4 h-4" />
-                        <span>{status.timeRemaining} min remaining</span>
+                        <span>
+                          {Math.max(0, Math.floor((new Date(status.current.endTime).getTime() - currentTime.getTime()) / 60000))} min remaining
+                        </span>
                       </div>
                     )}
                   </div>

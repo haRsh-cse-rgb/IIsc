@@ -5,7 +5,7 @@ import { Hall, hallSchema } from '@/lib/server/models/Hall';
 import { connectDatabase } from '@/lib/server/database';
 import { requireRole, getAuthUser } from '@/lib/server/auth';
 import { createAuditLog } from '@/lib/server/audit';
-import { getSocketIO } from '@/lib/server/socket';
+import { emitSocketEvent } from '@/lib/server/socket';
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     // Ensure isPlenary is always included (default to false if missing)
     const schedulesWithPlenary = schedules.map((schedule: any) => ({
       ...schedule,
-      isPlenary: schedule.isPlenary === true || schedule.isPlenary === 'true' || schedule.isPlenary === 1 || false
+      isPlenary: Boolean(schedule.isPlenary)
     }));
 
     // Log to verify isPlenary is included
@@ -87,8 +87,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Explicitly include isPlenary field - ensure it's always a boolean
-    // Handle both true and false values explicitly
-    const isPlenaryValue = body.isPlenary === true || body.isPlenary === 'true' || body.isPlenary === 1 || body.isPlenary === '1';
+    // Handle both true and false values explicitly (can be boolean, string, or number from form data)
+    const isPlenaryValue = Boolean(
+      body.isPlenary === true || 
+      body.isPlenary === 'true' || 
+      body.isPlenary === 1 || 
+      body.isPlenary === '1'
+    );
     
     const scheduleData: any = {
       title: body.title,
@@ -119,16 +124,13 @@ export async function POST(request: NextRequest) {
     
     // Ensure isPlenary is always included in response (use saved value from DB)
     if (plainSchedule && savedSchedule) {
-      plainSchedule.isPlenary = Boolean(savedSchedule.isPlenary === true || savedSchedule.isPlenary === 'true' || savedSchedule.isPlenary === 1);
+      plainSchedule.isPlenary = Boolean(savedSchedule.isPlenary);
       console.log('Returning schedule with isPlenary:', plainSchedule.isPlenary);
     } else if (plainSchedule) {
       plainSchedule.isPlenary = Boolean(plainSchedule.isPlenary);
     }
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('schedule:new', plainSchedule);
-    }
+    await emitSocketEvent('schedule:new', plainSchedule);
 
     const response = NextResponse.json(plainSchedule, { status: 201 });
     await createAuditLog(request, response, user, 'create', 'schedule', populated._id.toString(), body);

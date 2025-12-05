@@ -136,7 +136,9 @@ export class ApiClient {
   }
 
   async getHallStatus() {
-    return this.request<any[]>('/halls/status');
+    // Add timestamp to prevent caching
+    const timestamp = Date.now();
+    return this.request<any[]>(`/halls/status?t=${timestamp}`);
   }
 
   async createHall(data: any) {

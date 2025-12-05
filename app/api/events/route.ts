@@ -3,7 +3,7 @@ import { Event } from '@/lib/server/models/Event';
 import { connectDatabase } from '@/lib/server/database';
 import { requireRole } from '@/lib/server/auth';
 import { createAuditLog } from '@/lib/server/audit';
-import { getSocketIO } from '@/lib/server/socket';
+import { emitSocketEvent } from '@/lib/server/socket';
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,10 +80,7 @@ export async function POST(request: NextRequest) {
       _id: plainEvent._id.toString()
     };
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('event:new', serialized);
-    }
+    await emitSocketEvent('event:new', serialized);
 
     const response = NextResponse.json(serialized, { status: 201 });
     await createAuditLog(request, response, user, 'create', 'event', serialized._id, body);

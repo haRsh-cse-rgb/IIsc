@@ -4,7 +4,7 @@ import { User } from '@/lib/server/models/User';
 import { connectDatabase } from '@/lib/server/database';
 import { requireRole, getAuthUser } from '@/lib/server/auth';
 import { createAuditLog } from '@/lib/server/audit';
-import { getSocketIO } from '@/lib/server/socket';
+import { emitSocketEvent } from '@/lib/server/socket';
 
 export async function GET(
   request: NextRequest,
@@ -59,10 +59,7 @@ export async function PUT(
       );
     }
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('announcement:update', announcement);
-    }
+    await emitSocketEvent('announcement:update', announcement);
 
     const response = NextResponse.json(announcement);
     await createAuditLog(request, response, user, 'update', 'announcement', params.id, body);
@@ -99,10 +96,7 @@ export async function DELETE(
       );
     }
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('announcement:delete', { id: params.id });
-    }
+    await emitSocketEvent('announcement:delete', { id: params.id });
 
     const response = NextResponse.json({ message: 'Announcement deleted successfully' });
     await createAuditLog(request, response, user, 'delete', 'announcement', params.id, {});

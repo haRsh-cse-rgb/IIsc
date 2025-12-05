@@ -4,7 +4,7 @@ import { User } from '@/lib/server/models/User';
 import { connectDatabase } from '@/lib/server/database';
 import { requireAuth, requireRole, getAuthUser } from '@/lib/server/auth';
 import { createAuditLog } from '@/lib/server/audit';
-import { getSocketIO } from '@/lib/server/socket';
+import { emitSocketEvent } from '@/lib/server/socket';
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,10 +57,7 @@ export async function POST(request: NextRequest) {
 
     const complaint = await Complaint.create(body);
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('complaint:new', complaint);
-    }
+    await emitSocketEvent('complaint:new', complaint);
 
     return NextResponse.json(complaint, { status: 201 });
   } catch (error) {

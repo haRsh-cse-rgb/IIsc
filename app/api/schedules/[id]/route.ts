@@ -5,7 +5,7 @@ import { Hall, hallSchema } from '@/lib/server/models/Hall';
 import { connectDatabase } from '@/lib/server/database';
 import { requireRole } from '@/lib/server/auth';
 import { createAuditLog } from '@/lib/server/audit';
-import { getSocketIO } from '@/lib/server/socket';
+import { emitSocketEvent } from '@/lib/server/socket';
 
 export async function GET(
   request: NextRequest,
@@ -33,7 +33,7 @@ export async function GET(
     // Ensure isPlenary is always included (default to false if missing)
     const scheduleWithPlenary = {
       ...schedule,
-      isPlenary: schedule.isPlenary === true || schedule.isPlenary === 'true' || schedule.isPlenary === 1 || false
+      isPlenary: Boolean(schedule.isPlenary)
     };
 
     return NextResponse.json(scheduleWithPlenary);
@@ -62,8 +62,13 @@ export async function PUT(
     const body = await request.json();
 
     // Explicitly include isPlenary field - ensure it's always a boolean
-    // Handle both true and false values explicitly
-    const isPlenaryValue = body.isPlenary === true || body.isPlenary === 'true' || body.isPlenary === 1 || body.isPlenary === '1';
+    // Handle both true and false values explicitly (can be boolean, string, or number from form data)
+    const isPlenaryValue = Boolean(
+      body.isPlenary === true || 
+      body.isPlenary === 'true' || 
+      body.isPlenary === 1 || 
+      body.isPlenary === '1'
+    );
     
     // Build update data - always include isPlenary explicitly
     const updateData: any = {
@@ -92,10 +97,7 @@ export async function PUT(
       );
     }
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('schedule:update', schedule);
-    }
+    await emitSocketEvent('schedule:update', schedule);
 
     const response = NextResponse.json(schedule);
     await createAuditLog(request, response, user, 'update', 'schedule', params.id, body);
@@ -132,10 +134,7 @@ export async function DELETE(
       );
     }
 
-    const io = getSocketIO();
-    if (io) {
-      io.emit('schedule:delete', { id: params.id });
-    }
+    await emitSocketEvent('schedule:delete', { id: params.id });
 
     const response = NextResponse.json({ message: 'Schedule deleted successfully' });
     await createAuditLog(request, response, user, 'delete', 'schedule', params.id, {});
