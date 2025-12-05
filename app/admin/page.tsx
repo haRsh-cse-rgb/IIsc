@@ -553,18 +553,43 @@ function SchedulesTab() {
         return;
       }
       
+      // Construct date-time string and convert to UTC ISO string
+      // This ensures consistent storage regardless of server timezone
+      // Parse the date and time components, create Date in local time, then convert to ISO
+      const [year, month, day] = formData.date.split('-').map(Number);
+      const [startHour, startMin] = startTime24.split(':').map(Number);
+      const [endHour, endMin] = endTime24.split(':').map(Number);
+      
+      // Create Date objects in the browser's local timezone
+      // This represents the exact time the user entered
+      const startDateLocal = new Date(year, month - 1, day, startHour, startMin, 0);
+      const endDateLocal = new Date(year, month - 1, day, endHour, endMin, 0);
+      
+      // Convert to ISO string (UTC) for consistent storage
+      // The server will receive this and store it correctly
+      const startDateTime = startDateLocal.toISOString();
+      const endDateTime = endDateLocal.toISOString();
+      
       const data = {
         title: formData.title,
         authors: formData.authors,
         hall: formData.hall,
-        startTime: `${formData.date}T${startTime24}:00`,
-        endTime: `${formData.date}T${endTime24}:00`, // Same date as start
+        startTime: startDateTime,
+        endTime: endDateTime,
         status: formData.status,
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
         slideLink: formData.slideLink || undefined,
         description: formData.description || undefined,
         isPlenary: Boolean(formData.isPlenary), // Explicitly convert to boolean
       };
+      
+      console.log('Date input:', formData.date);
+      console.log('Start time 24h:', startTime24);
+      console.log('End time 24h:', endTime24);
+      console.log('Start datetime (local):', startDateLocal.toString());
+      console.log('Start datetime (ISO/UTC):', startDateTime);
+      console.log('End datetime (local):', endDateLocal.toString());
+      console.log('End datetime (ISO/UTC):', endDateTime);
       console.log('Submitting schedule data - formData.isPlenary:', formData.isPlenary, 'data.isPlenary:', data.isPlenary);
       console.log('Full data object:', JSON.stringify(data, null, 2));
       if (editing) {

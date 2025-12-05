@@ -95,12 +95,61 @@ export async function POST(request: NextRequest) {
       body.isPlenary === '1'
     );
     
+    // Parse date-time strings - should now be ISO strings with timezone from client
+    // If it's an ISO string (includes 'Z' or timezone), parse directly
+    // Otherwise, fall back to parsing as local time (for backward compatibility)
+    let startTime: Date;
+    let endTime: Date;
+    
+    if (typeof body.startTime === 'string') {
+      // Check if it's an ISO string with timezone
+      if (body.startTime.includes('Z') || body.startTime.match(/[+-]\d{2}:\d{2}$/)) {
+        // ISO string with timezone - parse directly
+        startTime = new Date(body.startTime);
+      } else {
+        // No timezone - parse components and create Date in server's local timezone
+        // (for backward compatibility with old format)
+        const [datePart, timePart] = body.startTime.split('T');
+        if (datePart && timePart) {
+          const [year, month, day] = datePart.split('-').map(Number);
+          const [hour, minute, second = 0] = timePart.split(':').map(Number);
+          startTime = new Date(year, month - 1, day, hour, minute, second || 0);
+        } else {
+          startTime = new Date(body.startTime);
+        }
+      }
+    } else {
+      startTime = new Date(body.startTime);
+    }
+    
+    if (typeof body.endTime === 'string') {
+      if (body.endTime.includes('Z') || body.endTime.match(/[+-]\d{2}:\d{2}$/)) {
+        endTime = new Date(body.endTime);
+      } else {
+        const [datePart, timePart] = body.endTime.split('T');
+        if (datePart && timePart) {
+          const [year, month, day] = datePart.split('-').map(Number);
+          const [hour, minute, second = 0] = timePart.split(':').map(Number);
+          endTime = new Date(year, month - 1, day, hour, minute, second || 0);
+        } else {
+          endTime = new Date(body.endTime);
+        }
+      }
+    } else {
+      endTime = new Date(body.endTime);
+    }
+    
+    console.log('Input startTime string:', body.startTime);
+    console.log('Parsed startTime:', startTime.toISOString());
+    console.log('Input endTime string:', body.endTime);
+    console.log('Parsed endTime:', endTime.toISOString());
+    
     const scheduleData: any = {
       title: body.title,
       authors: body.authors,
       hall: body.hall,
-      startTime: body.startTime,
-      endTime: body.endTime,
+      startTime: startTime,
+      endTime: endTime,
       status: body.status || 'upcoming',
       tags: body.tags || [],
       slideLink: body.slideLink,

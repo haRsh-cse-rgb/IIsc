@@ -70,11 +70,63 @@ export async function PUT(
       body.isPlenary === '1'
     );
     
+    // Parse date-time strings - should now be ISO strings with timezone from client
+    let startTime: Date | undefined;
+    let endTime: Date | undefined;
+    
+    if (body.startTime) {
+      if (typeof body.startTime === 'string') {
+        // Check if it's an ISO string with timezone
+        if (body.startTime.includes('Z') || body.startTime.match(/[+-]\d{2}:\d{2}$/)) {
+          startTime = new Date(body.startTime);
+        } else {
+          // No timezone - parse as local time (backward compatibility)
+          const [datePart, timePart] = body.startTime.split('T');
+          if (datePart && timePart) {
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second = 0] = timePart.split(':').map(Number);
+            startTime = new Date(year, month - 1, day, hour, minute, second || 0);
+          } else {
+            startTime = new Date(body.startTime);
+          }
+        }
+      } else {
+        startTime = new Date(body.startTime);
+      }
+    }
+    
+    if (body.endTime) {
+      if (typeof body.endTime === 'string') {
+        if (body.endTime.includes('Z') || body.endTime.match(/[+-]\d{2}:\d{2}$/)) {
+          endTime = new Date(body.endTime);
+        } else {
+          const [datePart, timePart] = body.endTime.split('T');
+          if (datePart && timePart) {
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second = 0] = timePart.split(':').map(Number);
+            endTime = new Date(year, month - 1, day, hour, minute, second || 0);
+          } else {
+            endTime = new Date(body.endTime);
+          }
+        }
+      } else {
+        endTime = new Date(body.endTime);
+      }
+    }
+    
     // Build update data - always include isPlenary explicitly
     const updateData: any = {
       ...body,
       isPlenary: Boolean(isPlenaryValue), // Always explicitly set, even if false
     };
+    
+    // Override with parsed dates if they were provided
+    if (startTime) {
+      updateData.startTime = startTime;
+    }
+    if (endTime) {
+      updateData.endTime = endTime;
+    }
     
     console.log('Updating schedule - body.isPlenary:', body.isPlenary, 'typeof:', typeof body.isPlenary);
     console.log('Updating schedule with data:', JSON.stringify(updateData, null, 2));

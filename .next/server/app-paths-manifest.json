@@ -1,9 +1,7 @@
 {
+  "/events/page": "app/events/page.js",
   "/page": "app/page.js",
   "/admin/page": "app/admin/page.js",
-  "/events/page": "app/events/page.js",
   "/halls/page": "app/halls/page.js",
-  "/programs/page": "app/programs/page.js",
-  "/api/schedules/route": "app/api/schedules/route.js",
-  "/api/halls/route": "app/api/halls/route.js"
+  "/programs/page": "app/programs/page.js"
 }
