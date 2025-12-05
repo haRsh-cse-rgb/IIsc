@@ -427,9 +427,8 @@ function SchedulesTab() {
     title: string;
     authors: string;
     hall: string;
-    startDate: string;
+    date: string;
     startTime: string;
-    endDate: string;
     endTime: string;
     status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
     tags: string;
@@ -440,10 +439,9 @@ function SchedulesTab() {
     title: '',
     authors: '',
     hall: '',
-    startDate: '',
-    startTime: '',
-    endDate: '',
-    endTime: '',
+    date: '',
+    startTime: '09:00 AM',
+    endTime: '10:00 AM',
     status: 'upcoming',
     tags: '',
     slideLink: '',
@@ -479,15 +477,37 @@ function SchedulesTab() {
 
   // Helper function to convert 12-hour time to 24-hour format
   const convertTo24Hour = (time12h: string): string => {
-    const [time, period] = time12h.split(' ');
-    const [hours, minutes] = time.split(':');
-    let hour24 = parseInt(hours);
+    if (!time12h || !time12h.trim()) {
+      throw new Error('Time is required');
+    }
+    
+    const parts = time12h.trim().split(' ');
+    if (parts.length < 2) {
+      throw new Error('Invalid time format. Expected format: HH:MM AM/PM');
+    }
+    
+    const [time, period] = parts;
+    const timeParts = time.split(':');
+    
+    if (timeParts.length < 2) {
+      throw new Error('Invalid time format. Expected format: HH:MM AM/PM');
+    }
+    
+    const [hours, minutes] = timeParts;
+    let hour24 = parseInt(hours, 10);
+    const min = minutes || '00';
+    
+    if (isNaN(hour24) || hour24 < 1 || hour24 > 12) {
+      throw new Error('Invalid hour. Must be between 1 and 12');
+    }
+    
     if (period === 'PM' && hour24 !== 12) {
       hour24 += 12;
     } else if (period === 'AM' && hour24 === 12) {
       hour24 = 0;
     }
-    return `${hour24.toString().padStart(2, '0')}:${minutes}`;
+    
+    return `${hour24.toString().padStart(2, '0')}:${min}`;
   };
 
   // Helper function to convert 24-hour time to 12-hour format
@@ -506,16 +526,39 @@ function SchedulesTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Validate required fields
+      if (!formData.date) {
+        alert('Please select a date');
+        return;
+      }
+      if (!formData.startTime || !formData.startTime.trim()) {
+        alert('Please select a start time');
+        return;
+      }
+      if (!formData.endTime || !formData.endTime.trim()) {
+        alert('Please select an end time');
+        return;
+      }
+      
       // Combine date and time, converting 12-hour to 24-hour format
-      const startTime24 = convertTo24Hour(formData.startTime);
-      const endTime24 = convertTo24Hour(formData.endTime);
+      // End date is same as start date
+      let startTime24: string;
+      let endTime24: string;
+      
+      try {
+        startTime24 = convertTo24Hour(formData.startTime);
+        endTime24 = convertTo24Hour(formData.endTime);
+      } catch (timeError: any) {
+        alert(`Time format error: ${timeError.message}`);
+        return;
+      }
       
       const data = {
         title: formData.title,
         authors: formData.authors,
         hall: formData.hall,
-        startTime: `${formData.startDate}T${startTime24}:00`,
-        endTime: `${formData.endDate}T${endTime24}:00`,
+        startTime: `${formData.date}T${startTime24}:00`,
+        endTime: `${formData.date}T${endTime24}:00`, // Same date as start
         status: formData.status,
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
         slideLink: formData.slideLink || undefined,
@@ -532,7 +575,7 @@ function SchedulesTab() {
       setShowForm(false);
       setEditing(null);
       setFormData({
-        title: '', authors: '', hall: '', startDate: '', startTime: '', endDate: '', endTime: '',
+        title: '', authors: '', hall: '', date: '', startTime: '09:00 AM', endTime: '10:00 AM',
         status: 'upcoming', tags: '', slideLink: '', description: '', isPlenary: false,
       });
       loadData();
@@ -550,13 +593,13 @@ function SchedulesTab() {
     const startDate = new Date(schedule.startTime);
     const endDate = new Date(schedule.endTime);
     
+    // Use start date for both (end date will be same as start date)
     setFormData({
       title: schedule.title,
       authors: schedule.authors,
       hall: typeof schedule.hall === 'object' && schedule.hall !== null ? schedule.hall._id : (schedule.hall || ''),
-      startDate: format(startDate, 'yyyy-MM-dd'),
+      date: format(startDate, 'yyyy-MM-dd'),
       startTime: convertTo12Hour(format(startDate, 'HH:mm')),
-      endDate: format(endDate, 'yyyy-MM-dd'),
       endTime: convertTo12Hour(format(endDate, 'HH:mm')),
       status: schedule.status,
       tags: schedule.tags.join(', '),
@@ -589,7 +632,7 @@ function SchedulesTab() {
             setShowForm(true);
             setEditing(null);
             setFormData({
-              title: '', authors: '', hall: '', startDate: '', startTime: '', endDate: '', endTime: '',
+              title: '', authors: '', hall: '', date: '', startTime: '09:00 AM', endTime: '10:00 AM',
               status: 'upcoming', tags: '', slideLink: '', description: '', isPlenary: false,
             });
           }}
@@ -660,25 +703,26 @@ function SchedulesTab() {
                 </select>
               </div>
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Date</label>
+              <input
+                type="date"
+                required
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+            </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Start Date</label>
-                <input
-                  type="date"
-                  required
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Start Time</label>
                 <div className="flex items-center space-x-2">
                   <select
                     required
-                    value={formData.startTime.split(':')[0] || '09'}
+                    value={formData.startTime ? (formData.startTime.split(':')[0] || '09') : '09'}
                     onChange={(e) => {
-                      const [hour, rest] = formData.startTime.split(':');
+                      const currentTime = formData.startTime || '09:00 AM';
+                      const [hour, rest] = currentTime.split(':');
                       const [min, period] = rest ? rest.split(' ') : ['00', 'AM'];
                       setFormData({ ...formData, startTime: `${e.target.value}:${min} ${period}` });
                     }}
@@ -693,11 +737,12 @@ function SchedulesTab() {
                   <span className="text-gray-500">:</span>
                   <select
                     required
-                    value={formData.startTime.split(':')[1]?.split(' ')[0] || '00'}
+                    value={formData.startTime ? (formData.startTime.split(':')[1]?.split(' ')[0] || '00') : '00'}
                     onChange={(e) => {
-                      const [hour, rest] = formData.startTime.split(':');
+                      const currentTime = formData.startTime || '09:00 AM';
+                      const [hour, rest] = currentTime.split(':');
                       const period = rest ? rest.split(' ')[1] || 'AM' : 'AM';
-                      setFormData({ ...formData, startTime: `${hour}:${e.target.value} ${period}` });
+                      setFormData({ ...formData, startTime: `${hour || '09'}:${e.target.value} ${period}` });
                     }}
                     className="px-3 py-2 border rounded-lg"
                   >
@@ -709,10 +754,11 @@ function SchedulesTab() {
                   </select>
                   <select
                     required
-                    value={formData.startTime.split(' ')[1] || 'AM'}
+                    value={formData.startTime ? (formData.startTime.split(' ')[1] || 'AM') : 'AM'}
                     onChange={(e) => {
-                      const [time] = formData.startTime.split(' ');
-                      setFormData({ ...formData, startTime: `${time} ${e.target.value}` });
+                      const currentTime = formData.startTime || '09:00 AM';
+                      const [time] = currentTime.split(' ');
+                      setFormData({ ...formData, startTime: `${time || '09:00'} ${e.target.value}` });
                     }}
                     className="px-3 py-2 border rounded-lg"
                   >
@@ -721,26 +767,15 @@ function SchedulesTab() {
                   </select>
                 </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">End Date</label>
-                <input
-                  type="date"
-                  required
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">End Time</label>
                 <div className="flex items-center space-x-2">
                   <select
                     required
-                    value={formData.endTime.split(':')[0] || '10'}
+                    value={formData.endTime ? (formData.endTime.split(':')[0] || '10') : '10'}
                     onChange={(e) => {
-                      const [hour, rest] = formData.endTime.split(':');
+                      const currentTime = formData.endTime || '10:00 AM';
+                      const [hour, rest] = currentTime.split(':');
                       const [min, period] = rest ? rest.split(' ') : ['00', 'AM'];
                       setFormData({ ...formData, endTime: `${e.target.value}:${min} ${period}` });
                     }}
@@ -755,11 +790,12 @@ function SchedulesTab() {
                   <span className="text-gray-500">:</span>
                   <select
                     required
-                    value={formData.endTime.split(':')[1]?.split(' ')[0] || '00'}
+                    value={formData.endTime ? (formData.endTime.split(':')[1]?.split(' ')[0] || '00') : '00'}
                     onChange={(e) => {
-                      const [hour, rest] = formData.endTime.split(':');
+                      const currentTime = formData.endTime || '10:00 AM';
+                      const [hour, rest] = currentTime.split(':');
                       const period = rest ? rest.split(' ')[1] || 'AM' : 'AM';
-                      setFormData({ ...formData, endTime: `${hour}:${e.target.value} ${period}` });
+                      setFormData({ ...formData, endTime: `${hour || '10'}:${e.target.value} ${period}` });
                     }}
                     className="px-3 py-2 border rounded-lg"
                   >
@@ -771,10 +807,11 @@ function SchedulesTab() {
                   </select>
                   <select
                     required
-                    value={formData.endTime.split(' ')[1] || 'AM'}
+                    value={formData.endTime ? (formData.endTime.split(' ')[1] || 'AM') : 'AM'}
                     onChange={(e) => {
-                      const [time] = formData.endTime.split(' ');
-                      setFormData({ ...formData, endTime: `${time} ${e.target.value}` });
+                      const currentTime = formData.endTime || '10:00 AM';
+                      const [time] = currentTime.split(' ');
+                      setFormData({ ...formData, endTime: `${time || '10:00'} ${e.target.value}` });
                     }}
                     className="px-3 py-2 border rounded-lg"
                   >

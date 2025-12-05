@@ -32,9 +32,13 @@ export default function ProgramsPage() {
     });
 
     socketClient.on('schedule:update', (schedule: Schedule) => {
-      setSchedules(prev =>
-        prev.map(s => (s._id === schedule._id ? schedule : s))
-      );
+      setSchedules(prev => {
+        const updated = prev.map(s => (s._id === schedule._id ? schedule : s));
+        // Re-sort after update
+        return updated.sort((a, b) => {
+          return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+        });
+      });
     });
 
     socketClient.on('schedule:delete', ({ id }: { id: string }) => {
@@ -133,7 +137,11 @@ export default function ProgramsPage() {
       const data = await api.getSchedules();
       console.log('Schedules loaded:', data);
       console.log('Schedules count:', data?.length);
-      setSchedules(data || []);
+      // Sort schedules by start time (earliest first)
+      const sortedData = (data || []).sort((a, b) => {
+        return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+      });
+      setSchedules(sortedData);
     } catch (error) {
       console.error('Failed to load schedules:', error);
     } finally {
@@ -182,13 +190,18 @@ export default function ProgramsPage() {
     return Array.from(halls);
   };
 
-  const filteredSchedules = schedules.filter(schedule => {
-    const dayMatch = selectedDay === 'all' ||
-      format(new Date(schedule.startTime), 'yyyy-MM-dd') === selectedDay;
-    const hallMatch = selectedHall === 'all' || 
-      (schedule.hall && typeof schedule.hall === 'object' && schedule.hall._id === selectedHall);
-    return dayMatch && hallMatch;
-  });
+  const filteredSchedules = schedules
+    .filter(schedule => {
+      const dayMatch = selectedDay === 'all' ||
+        format(new Date(schedule.startTime), 'yyyy-MM-dd') === selectedDay;
+      const hallMatch = selectedHall === 'all' || 
+        (schedule.hall && typeof schedule.hall === 'object' && schedule.hall._id === selectedHall);
+      return dayMatch && hallMatch;
+    })
+    .sort((a, b) => {
+      // Sort by start time (earliest first)
+      return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+    });
 
   // Calculate status based on current time vs presentation time
   const getCalculatedStatus = (schedule: Schedule): 'upcoming' | 'ongoing' | 'completed' | 'cancelled' => {
@@ -347,6 +360,7 @@ export default function ProgramsPage() {
                       <div className="flex items-center space-x-2 text-sm text-gray-700">
                         <Clock className="w-4 h-4 flex-shrink-0 text-gray-500" />
                         <span className="font-medium">
+                          {format(new Date(schedule.startTime), 'MMM d, yyyy')} • {' '}
                           {format(new Date(schedule.startTime), 'h:mm a')} -{' '}
                           {format(new Date(schedule.endTime), 'h:mm a')}
                         </span>
