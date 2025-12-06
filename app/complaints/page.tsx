@@ -26,7 +26,14 @@ export default function ComplaintsPage() {
     setLoading(true);
 
     try {
-      await api.createComplaint(formData);
+      // Clean up the data - remove empty strings for optional fields
+      const cleanedData = {
+        ...formData,
+        contactEmail: formData.contactEmail.trim() || undefined,
+        contactPhone: formData.contactPhone.trim() || undefined,
+      };
+      
+      await api.createComplaint(cleanedData);
       setSubmitted(true);
       setFormData({
         category: 'other',
@@ -152,7 +159,7 @@ export default function ComplaintsPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email (Optional)
+                Email
               </label>
               <input
                 type="email"
@@ -165,7 +172,7 @@ export default function ComplaintsPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone (Optional)
+                Phone
               </label>
               <input
                 type="tel"

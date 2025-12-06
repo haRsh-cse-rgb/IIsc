@@ -589,8 +589,7 @@ function SchedulesTab() {
       console.log('Start datetime (local):', startDateLocal.toString());
       console.log('Start datetime (ISO/UTC):', startDateTime);
       console.log('End datetime (local):', endDateLocal.toString());
-      console.log('End datetime (ISO/UTC):', endDateTime);
-      console.log('Submitting schedule data - formData.isPlenary:', formData.isPlenary, 'data.isPlenary:', data.isPlenary);
+      console.log('End datetime (ISO/UTC):', endDateTime);      console.log('Submitting schedule data - formData.isPlenary:', formData.isPlenary, 'data.isPlenary:', data.isPlenary);
       console.log('Full data object:', JSON.stringify(data, null, 2));
       if (editing) {
         await api.updateSchedule(editing._id, data);
@@ -1079,9 +1078,16 @@ function ComplaintsTab() {
                   </span>
                 </div>
                 <p className="text-gray-700 mb-2">{complaint.description}</p>
-                <p className="text-gray-500 text-sm">
+                <p className="text-gray-500 text-sm mb-1">
                   Category: {complaint.category} | {format(new Date(complaint.createdAt), 'PPp')}
                 </p>
+                {(complaint.contactEmail || complaint.contactPhone) && (
+                  <p className="text-gray-600 text-sm font-medium mb-2">
+                    Contact: {complaint.contactEmail && <span>Email: {complaint.contactEmail}</span>}
+                    {complaint.contactEmail && complaint.contactPhone && <span> | </span>}
+                    {complaint.contactPhone && <span>Phone: {complaint.contactPhone}</span>}
+                  </p>
+                )}
                 {complaint.response && (
                   <div className="mt-2 p-2 bg-blue-50 rounded">
                     <p className="text-sm font-medium text-blue-900">Response:</p>
