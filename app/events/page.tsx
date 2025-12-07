@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Utensils, Music, Calendar, MapPin, Clock, Ticket } from 'lucide-react';
+import { Utensils, Music, Calendar, MapPin, Clock, Ticket, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '@/src/lib/api';
 import { socketClient } from '@/src/lib/socket';
 import { Event } from '@/src/types';
@@ -31,18 +31,24 @@ function FilterButtonsWithScrollIndicator({
     if (!scrollContainerRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
     const needsScrolling = scrollWidth > clientWidth;
-    setCanScrollLeft(needsScrolling && scrollLeft > 0);
-    setCanScrollRight(needsScrolling && scrollLeft < scrollWidth - clientWidth - 1);
+    // Show left arrow if we've scrolled away from the start
+    setCanScrollLeft(needsScrolling && scrollLeft > 10);
+    // Show right arrow if there's more content to scroll (with small threshold for edge cases)
+    setCanScrollRight(needsScrolling && scrollLeft < scrollWidth - clientWidth - 10);
   };
 
   useEffect(() => {
+    // Check immediately and after a short delay to ensure DOM is fully rendered
     checkScrollability();
+    const timeoutId = setTimeout(checkScrollability, 100);
+    
     const container = scrollContainerRef.current;
     if (container) {
       container.addEventListener('scroll', checkScrollability);
       window.addEventListener('resize', checkScrollability);
     }
     return () => {
+      clearTimeout(timeoutId);
       if (container) {
         container.removeEventListener('scroll', checkScrollability);
       }
@@ -50,36 +56,72 @@ function FilterButtonsWithScrollIndicator({
     };
   }, [uniqueTypes]);
 
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div 
-      ref={scrollContainerRef}
-      className={`horizontal-scroll-container scroll-fade-left scroll-fade-right flex items-center space-x-3 pb-2 ${
-        canScrollLeft ? '' : 'scrolled-to-start'
-      } ${canScrollRight ? '' : 'scrolled-to-end'}`}
-    >
-      <button
-        onClick={() => setFilter('all')}
-        className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
-          filter === 'all'
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-        }`}
+    <div className="relative">
+      {/* Left Arrow */}
+      {canScrollLeft && (
+        <button
+          onClick={scrollLeft}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-all border border-gray-200 hover:scale-110"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-700" />
+        </button>
+      )}
+      
+      {/* Right Arrow */}
+      {canScrollRight && (
+        <button
+          onClick={scrollRight}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-all border border-gray-200 hover:scale-110"
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="w-5 h-5 text-gray-700" />
+        </button>
+      )}
+
+      <div 
+        ref={scrollContainerRef}
+        className={`horizontal-scroll-container scroll-fade-left scroll-fade-right flex items-center space-x-3 pb-2 overflow-x-auto scrollbar-hide ${
+          canScrollLeft ? 'pl-12' : ''
+        } ${canScrollRight ? 'pr-12' : ''}`}
       >
-        All Events
-      </button>
-      {uniqueTypes.map((type) => {
-        const Icon = getEventIcon(type);
-        return (
-          <button
-            key={type}
-            onClick={() => setFilter(type)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${getFilterButtonColor(type, filter === type)}`}
-          >
-            <Icon className="w-4 h-4" />
-            <span>{getTypeDisplayName(type)}</span>
-          </button>
-        );
-      })}
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+            filter === 'all'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          All Events
+        </button>
+        {uniqueTypes.map((type) => {
+          const Icon = getEventIcon(type);
+          return (
+            <button
+              key={type}
+              onClick={() => setFilter(type)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${getFilterButtonColor(type, filter === type)}`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{getTypeDisplayName(type)}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

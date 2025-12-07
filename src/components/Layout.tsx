@@ -305,7 +305,7 @@ export const Layout = ({ children }: LayoutProps) => {
     { id: '/programs', label: 'Programs', icon: Calendar, path: '/programs' },
     { id: '/halls', label: 'Halls', icon: Users, path: '/halls' },
     { id: '/maps', label: 'Maps', icon: MapPin, path: '/maps' },
-    { id: '/menu', label: 'Menu', icon: Coffee, path: '/menu' },
+    // { id: '/menu', label: 'Menu', icon: Coffee, path: '/menu' },
     { id: '/events', label: 'Events', icon: Utensils, path: '/events' },
     { id: '/complaints', label: 'Feedback', icon: MessageCircle, path: '/complaints' },
   ];
