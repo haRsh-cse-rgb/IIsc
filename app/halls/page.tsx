@@ -90,7 +90,7 @@ export default function HallsPage() {
           {hallStatuses.map((status) => (
             <div key={status.hall.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-4 text-white">
-                <h2 className="text-2xl font-bold">{status.hall.code}</h2>
+                
                 <p className="text-purple-100 text-sm">{status.hall.name}</p>
                 <div className="flex items-center space-x-2 text-sm mt-1 text-purple-100">
                   <MapPin className="w-4 h-4" />
