@@ -1,0 +1,224 @@
+{
+  "2024-12-10": [
+    {
+      "sessionNo": "TS-13",
+      "theme": "Process Modelling and Simulation in Iron and Steel Making",
+      "sessionChair": "G.G. Roy",
+      "startTime": "09:45 AM",
+      "endTime": "10:42 AM",
+      "hallName": "J N Tata Main Auditorium",
+      "hallCode": "JNTA"
+    },
+    {
+      "sessionNo": "TS-14",
+      "theme": "DRI / Solid-state Ironmaking Processes",
+      "sessionChair": "Geoff Wang",
+      "startTime": "09:45 AM",
+      "endTime": "10:42 AM",
+      "hallName": "Hall A (J N Tata Auditorium)",
+      "hallCode": "HA"
+    },
+    {
+      "sessionNo": "TS-15",
+      "theme": "Waste Recycling and Circular Economy in Iron and Steel Making",
+      "sessionChair": "D Satish",
+      "startTime": "09:45 AM",
+      "endTime": "10:42 AM",
+      "hallName": "Hall B (J N Tata Auditorium)",
+      "hallCode": "HB"
+    },
+    {
+      "sessionNo": "TS-16",
+      "theme": "DRI + Emerging Sustainable Ironmaking",
+      "sessionChair": "Viswanathan Nurni",
+      "startTime": "09:45 AM",
+      "endTime": "10:42 AM",
+      "hallName": "Satish Dhawan Auditorium",
+      "hallCode": "SDA"
+    },
+    {
+      "sessionNo": "TS-17",
+      "theme": "Primary, Secondary Steel Making and Clean Steel Technology",
+      "sessionChair": "Miyuki Hayashi",
+      "startTime": "11:20 AM",
+      "endTime": "1:05 PM",
+      "hallName": "J N Tata Main Auditorium",
+      "hallCode": "JNTA"
+    },
+    {
+      "sessionNo": "TS-18",
+      "theme": "Raw Materials, Use of Low-Grade Ores and Agglomeration",
+      "sessionChair": "S Sarma Kanchobhotla",
+      "startTime": "11:20 AM",
+      "endTime": "1:05 PM",
+      "hallName": "Hall A (J N Tata Auditorium)",
+      "hallCode": "HA"
+    },
+    {
+      "sessionNo": "TS-19",
+      "theme": "Process Modelling and Simulation + Waste",
+      "sessionChair": "Brahma Deo",
+      "startTime": "11:20 AM",
+      "endTime": "1:05 PM",
+      "hallName": "Hall B (J N Tata Auditorium)",
+      "hallCode": "HB"
+    },
+    {
+      "sessionNo": "TS-20",
+      "theme": "DRI / Solid-State Ironmaking Processes",
+      "sessionChair": "Ashok Kamaraj",
+      "startTime": "11:20 AM",
+      "endTime": "12:32 PM",
+      "hallName": "Satish Dhawan Auditorium",
+      "hallCode": "SDA"
+    },
+    {
+      "sessionNo": "TS-21",
+      "theme": "Primary, Secondary Steel Making and Clean Steel Technology",
+      "sessionChair": "Charlotte Anderson",
+      "startTime": "3:55 PM",
+      "endTime": "5:16 PM",
+      "hallName": "J N Tata Main Auditorium",
+      "hallCode": "JNTA"
+    },
+    {
+      "sessionNo": "TS-22",
+      "theme": "Waste Recycling and Circular Economy in Iron and Steel Making",
+      "sessionChair": "Akbar Rhamdhani",
+      "startTime": "3:55 PM",
+      "endTime": "5:16 PM",
+      "hallName": "Hall A (J N Tata Auditorium)",
+      "hallCode": "HA"
+    },
+    {
+      "sessionNo": "TS-23",
+      "theme": "Raw Materials, Use of Low-Grade Ores and Agglomeration",
+      "sessionChair": "Narasimha Mangadoddy",
+      "startTime": "3:55 PM",
+      "endTime": "5:04 PM",
+      "hallName": "Hall-B (J N Tata Auditorium)",
+      "hallCode": "HB"
+    },
+    {
+      "sessionNo": "TS-24",
+      "theme": "Process Modelling and Simulation in Iron and Steel Making",
+      "sessionChair": "Dharam Jeet Gavel",
+      "startTime": "3:55 PM",
+      "endTime": "4:43 PM",
+      "hallName": "Satish Dhawan Auditorium",
+      "hallCode": "SDA"
+    }
+  ],
+  "2024-12-11": [
+    {
+      "sessionNo": "TS-29",
+      "theme": "Ingot and Continuous Casting",
+      "sessionChair": "Pikee Priya",
+      "startTime": "9:45 AM",
+      "endTime": "10:42 AM",
+      "hallName": "J N Tata Main Auditorium",
+      "hallCode": "JNTA"
+    },
+    {
+      "sessionNo": "TS-30",
+      "theme": "In-plant Waste Recycling + Raw Materials",
+      "sessionChair": "Zulfiadi Zulhan",
+      "startTime": "9:45 AM",
+      "endTime": "10:42 AM",
+      "hallName": "Hall A (J N Tata Auditorium)",
+      "hallCode": "HA"
+    },
+    {
+      "sessionNo": "TS-31",
+      "theme": "Engineering, Environment + In-plant Waste Recycling + Refractory",
+      "sessionChair": "Yakov Gordon",
+      "startTime": "9:45 AM",
+      "endTime": "10:42 AM",
+      "hallName": "Hall-B (J N Tata Auditorium)",
+      "hallCode": "HB"
+    },
+    {
+      "sessionNo": "TS-32",
+      "theme": "DRI Solid State + Blast Furnace Alternatives",
+      "sessionChair": "Sabita Sarkar",
+      "startTime": "9:45 AM",
+      "endTime": "10:42 AM",
+      "hallName": "Satish Dhawan Auditorium",
+      "hallCode": "SDA"
+    },
+    
+    {
+      "sessionNo": "TS-33",
+      "theme": "Raw Material + In-Plant + Primary Steelmaking + DRI + Coke",
+      "sessionChair": "Sripriya R",
+      "startTime": "11:25 AM",
+      "endTime": "1:14 PM",
+      "hallName": "J N Tata Main Auditorium",
+      "hallCode": "JNTA"
+    },
+    {
+      "sessionNo": "TS-34",
+      "theme": "Energy, Environment, and Sustainability in Iron and Steel Making",
+      "sessionChair": "Hiroyuki Matsuura",
+      "startTime": "11:25 AM",
+      "endTime": "1:14 PM",
+      "hallName": "Hall A (J N Tata Auditorium)",
+      "hallCode": "HA"
+    },
+    {
+      "sessionNo": "TS-35",
+      "theme": "Coke, PCI, Hydrogen, Syngas, Biomass, and Other Auxiliary Fuels",
+      "sessionChair": "Deepoo Kumar",
+      "startTime": "11:25 AM",
+      "endTime": "1:14 PM",
+      "hallName": "Hall-B (J N Tata Auditorium)",
+      "hallCode": "HB"
+    },
+    {
+      "sessionNo": "TS-36",
+      "theme": "DRI / Solid State + Blast Furnace Alternatives + Digital + Process + Fundamentals of Ironmaking and Steelmaking",
+      "sessionChair": "S. Subramanian",
+      "startTime": "11:25 AM",
+      "endTime": "1:14 PM",
+      "hallName": "Satish Dhawan Auditorium",
+      "hallCode": "SDA"
+    },
+    {
+      "sessionNo": "TS-37",
+      "theme": "Fundamentals of Ironmaking + Emerging + Primary + Digital",
+      "sessionChair": "Rahul Sarkar",
+      "startTime": "2:20 PM",
+      "endTime": "3:25 PM",
+      "hallName": "J N Tata Main Auditorium",
+      "hallCode": "JNTA"
+    },
+    {
+      "sessionNo": "TS-38",
+      "theme": "Primary & Secondary + Process Modelling + Digital",
+      "sessionChair": "Prosenjit Das",
+      "startTime": "2:20 PM",
+      "endTime": "3:25 PM",
+      "hallName": "Hall A (J N Tata Auditorium)",
+      "hallCode": "HA"
+    },
+    {
+      "sessionNo": "TS-39",
+      "theme": "Fundamentals of Ironmaking + Primary & Secondary + Process Modelling",
+      "sessionChair": "Jung-Wook Cho",
+      "startTime": "2:20 PM",
+      "endTime": "3:25 PM",
+      "hallName": "Hall-B (J N Tata Auditorium)",
+      "hallCode": "HB"
+    },
+    {
+      "sessionNo": "TS-40",
+      "theme": "Raw Mate + Emerging",
+      "sessionChair": "Rameshwar Sah",
+      "startTime": "2:20 PM",
+      "endTime": "3:25 PM",
+      "hallName": "Satish Dhawan Auditorium",
+      "hallCode": "SDA"
+    }
+  ]
+}
+

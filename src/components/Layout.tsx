@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useState, useEffect, useRef } from 'react';
-import { Home, Calendar, Users, MapPin, MessageCircle, Utensils, Settings, Coffee, Download } from 'lucide-react';
+import { Home, Calendar, Users, MapPin, MessageCircle, Utensils, Settings, Coffee, Download, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -303,6 +303,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const mainNavItems = [
     { id: '/', label: 'Home', icon: Home, path: '/' },
     { id: '/programs', label: 'Programs', icon: Calendar, path: '/programs' },
+    { id: '/sessions', label: 'Sessions', icon: FileText, path: '/sessions' },
     { id: '/halls', label: 'Halls', icon: Users, path: '/halls' },
     { id: '/maps', label: 'Maps', icon: MapPin, path: '/maps' },
     // { id: '/menu', label: 'Menu', icon: Coffee, path: '/menu' },
